@@ -1,7 +1,9 @@
 import spotipy
 import spotipy.oauth2 as oauth2
 import lyricwikia
+import os
 
+from core import const
 from core import internals
 from core.const import log
 
@@ -136,6 +138,12 @@ def write_playlist(playlist_url, text_file=None):
     tracks = playlist['tracks']
     if not text_file:
         text_file = u'{0}.txt'.format(slugify(playlist['name'], ok='-_()[]{}'))
+
+    if const.args.direct_download:
+        const.args.folder = os.path.join(const.args.folder, slugify(playlist['name'], ok=' -_()[]{}'))
+        os.mkdir(const.args.folder)
+        const.args.list = text_file
+    
     return write_tracks(tracks, text_file)
 
 

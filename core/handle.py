@@ -28,7 +28,8 @@ default_conf = { 'spotify-downloader':
                    'file-format'            : '{artist} - {track_name}',
                    'search-format'          : '{artist} - {track_name} lyrics',
                    'youtube-api-key'        : None,
-                   'log-level'              : 'INFO' }
+                   'log-level'              : 'INFO',
+                   'direct_download'        : False }
                }
 
 
@@ -177,6 +178,10 @@ def get_arguments(raw_args=None, to_group=True, to_merge=True):
         '-c', '--config', default=None,
         help='path to config.yml file (otherwise load it from same '
              'directory as spotdl.py)')
+    parser.add_argument(
+        '--direct_download', default=config['direct_download'],
+        help='download the playlist directly from the playlist',
+        action='store_true')
 
     parsed = parser.parse_args(raw_args)
 

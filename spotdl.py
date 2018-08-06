@@ -15,6 +15,7 @@ import sys
 import time
 import platform
 import pprint
+import traceback
 
 __version__ = '0.9.3'
 
@@ -97,6 +98,8 @@ def download_list(text_file):
             with open(text_file, 'a') as myfile:
                 myfile.write(raw_song + '\n')
             log.warning('Failed to download song. Will retry after other songs\n')
+            traceback.print_exc(file=sys.stdout)
+
             # wait 0.5 sec to avoid infinite looping
             time.sleep(0.5)
             continue
@@ -115,9 +118,12 @@ def download_single(raw_song, number=None):
         content = youtube_tools.go_pafy(raw_song, meta_tags=None)
         raw_song = slugify(content.title).replace('-', ' ')
         meta_tags = spotify_tools.generate_metadata(raw_song)
+        meta_tags['number'] = number
     else:
         meta_tags = spotify_tools.generate_metadata(raw_song)
+        meta_tags['number'] = number
         content = youtube_tools.go_pafy(raw_song, meta_tags)
+
 
     if content is None:
         log.debug('Found no matching video')
@@ -192,11 +198,17 @@ def main():
     log.debug(pprint.pformat(const.args.__dict__))
 
     try:
-        if const.args.song:
+        if const.args.direct_download:
+            spotify_tools.write_playlist(playlist_url=const.args.playlist)
+            
+            download_list(text_file=const.args.list)
+
+            os.remove(const.args.list)
+        elif const.args.song:
             download_single(raw_song=const.args.song)
         elif const.args.list:
             download_list(text_file=const.args.list)
-        elif const.args.playlist:
+        elif const.args.playlist:            
             spotify_tools.write_playlist(playlist_url=const.args.playlist)
         elif const.args.album:
             spotify_tools.write_album(album_url=const.args.album)
