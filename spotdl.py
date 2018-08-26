@@ -67,8 +67,10 @@ def download_list(text_file):
     """ Download all songs from the list. """
     with open(text_file, 'r') as listed:
         # read tracks into a list and remove any duplicates
-        lines = listed.read().splitlines()
-        lines = list(set(lines))
+        _lines = listed.read().splitlines()
+
+        tmp = set()
+        lines = [x for x in _lines if x not in tmp and not tmp.add(x)]
     # ignore blank lines in text_file (if any)
     try:
         lines.remove('')
