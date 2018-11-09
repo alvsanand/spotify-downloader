@@ -25,7 +25,7 @@ default_conf = { 'spotify-downloader':
                    'dry-run'                : False,
                    'music-videos-only'      : False,
                    'no-spaces'              : False,
-                   'file-format'            : '{artist} - {track_name}',
+                   'file-format'            : '{number}_{artist}_{track_name}',
                    'search-format'          : '{artist} - {track_name} lyrics',
                    'youtube-api-key'        : None,
                    'log-level'              : 'INFO',

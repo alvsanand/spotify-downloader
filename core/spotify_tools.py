@@ -12,6 +12,8 @@ from titlecase import titlecase
 import pprint
 import sys
 
+import shutil
+
 
 def generate_token():
     """ Generate the token. Please respect these credentials :) """
@@ -141,7 +143,12 @@ def write_playlist(playlist_url, text_file=None):
 
     if const.args.direct_download:
         const.args.folder = os.path.join(const.args.folder, slugify(playlist['name'], ok=' -_()[]{}'))
+        
+        if os.path.isdir(const.args.folder):
+            shutil.rmtree(const.args.folder, ignore_errors=True)
+        
         os.mkdir(const.args.folder)
+        
         const.args.list = text_file
     
     return write_tracks(tracks, text_file)
