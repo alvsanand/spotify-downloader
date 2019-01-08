@@ -83,12 +83,6 @@ def generate_metadata(raw_song):
     return meta_tags
 
 
-def write_user_playlist(username, text_file=None):
-    links = get_playlists(username=username)
-    playlist = internals.input_link(links)
-    return write_playlist(playlist, text_file)
-
-
 def get_playlists(username):
     """ Fetch user playlists when using the -u option. """
     playlists = spotify.user_playlists(username)
@@ -135,63 +129,8 @@ def fetch_playlist(playlist):
     return results
 
 
-def write_playlist(playlist_url, text_file=None):
-    playlist = fetch_playlist(playlist_url)
-    tracks = playlist['tracks']
-    if not text_file:
-        text_file = u'{0}.txt'.format(slugify(playlist['name'], ok='-_()[]{}'))
-
-    if const.args.direct_download:
-        const.args.folder = os.path.join(const.args.folder, slugify(playlist['name'], ok=' -_()[]{}'))
-        
-        if os.path.isdir(const.args.folder):
-            shutil.rmtree(const.args.folder, ignore_errors=True)
-        
-        os.mkdir(const.args.folder)
-        
-        const.args.list = text_file
-    
-    return write_tracks(tracks, text_file)
-
-
 def fetch_album(album):
     splits = internals.get_splits(album)
     album_id = splits[-1]
     album = spotify.album(album_id)
     return album
-
-
-def write_album(album_url, text_file=None):
-    album = fetch_album(album_url)
-    tracks = spotify.album_tracks(album['id'])
-    if not text_file:
-        text_file = u'{0}.txt'.format(slugify(album['name'], ok='-_()[]{}'))
-    return write_tracks(tracks, text_file)
-
-
-def write_tracks(tracks, text_file):
-    log.info(u'Writing {0} tracks to {1}'.format(
-               tracks['total'], text_file))
-    track_urls = []
-    with open(text_file, 'a') as file_out:
-        while True:
-            for item in tracks['items']:
-                if 'track' in item:
-                    track = item['track']
-                else:
-                    track = item
-                try:
-                    track_url = track['external_urls']['spotify']
-                    log.debug(track_url)
-                    file_out.write(track_url + '\n')
-                    track_urls.append(track_url)
-                except KeyError:
-                    log.warning(u'Skipping track {0} by {1} (local only?)'.format(
-                        track['name'], track['artists'][0]['name']))
-            # 1 page = 50 results
-            # check if there are more pages
-            if tracks['next']:
-                tracks = spotify.next(tracks)
-            else:
-                break
-    return track_urls

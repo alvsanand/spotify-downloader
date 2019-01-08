@@ -22,7 +22,7 @@ setup(
     py_modules=['spotdl'],
     # Tests are included automatically:
     # https://docs.python.org/3.6/distutils/sourcedist.html#specifying-the-files-to-distribute
-    packages=['core'],
+    packages=['core', 'webapp'],
     version=version,
     install_requires=[
         'pathlib >= 1.0.1',
@@ -35,7 +35,9 @@ setup(
         'titlecase >= 0.10.0',
         'logzero >= 1.3.1',
         'lyricwikia >= 0.1.8',
-        'PyYAML >= 3.12'
+        'PyYAML >= 3.12',
+        'Flask >= 1.0.2',
+        'Flask-Cors >= 3.0.7'
     ],
     description='Download songs from YouTube using Spotify song URLs or playlists with albumart and meta-tags.',
     long_description=long_description,
@@ -45,7 +47,6 @@ setup(
     license='MIT',
     python_require='>=3.4',
     url='https://github.com/ritiek/spotify-downloader',
-    download_url='https://pypi.org/project/spotify-downloader/',
     keywords=['spotify', 'downloader', 'download', 'music', 'youtube', 'mp3', 'album', 'metadata'],
     classifiers=[
         'Development Status :: 4 - Beta',

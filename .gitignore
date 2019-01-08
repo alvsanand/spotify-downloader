@@ -112,3 +112,7 @@ venv.bak/
 
 # vscode
 .vscode
+
+# react-ui
+node_modules
+webapp/static

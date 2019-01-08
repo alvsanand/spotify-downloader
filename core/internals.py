@@ -1,16 +1,8 @@
 import os
 import sys
-
 from core import const
-
-log = const.log
-
-try:
-    from slugify import SLUG_OK, slugify
-except ImportError:
-    log.error('Oops! `unicode-slugify` was not found.')
-    log.info('Please remove any other slugify library and install `unicode-slugify`')
-    sys.exit(5)
+from core.const import log
+from slugify import SLUG_OK, slugify
 
 formats = { 0  : 'track_name',
             1  : 'artist',
@@ -25,22 +17,6 @@ formats = { 0  : 'track_name',
             10 : 'total_tracks',
             11 : 'isrc',
             12 : 'number' }
-
-
-def input_link(links):
-    """ Let the user input a choice. """
-    while True:
-        try:
-            log.info('Choose your number:')
-            the_chosen_one = int(input('> '))
-            if 1 <= the_chosen_one <= len(links):
-                return links[the_chosen_one - 1]
-            elif the_chosen_one == 0:
-                return None
-            else:
-                log.warning('Choose a valid number!')
-        except ValueError:
-            log.warning('Choose a valid number!')
 
 
 def trim_song(text_file):
