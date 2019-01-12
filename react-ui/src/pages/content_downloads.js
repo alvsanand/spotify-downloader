@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
+import TableFooter from '@material-ui/core/TableFooter';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import TableBody from '@material-ui/core/TableBody';
@@ -11,11 +12,16 @@ import Typography from '@material-ui/core/Typography';
 import ErrorIcon from '@material-ui/icons/Error';
 import DoneIcon from '@material-ui/icons/Done';
 import CachedIcon from '@material-ui/icons/Cached';
+import CancelIcon from '@material-ui/icons/Cancel';
+import RefreshIcon from '@material-ui/icons/Refresh';
+import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
+import Button from '@material-ui/core/Button';
+
+import Config from './config';
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    maxWidth: "60%",
   },
   button: {
     margin: theme.spacing.unit,
@@ -33,13 +39,14 @@ const styles = theme => ({
   title: {
     margin: `${theme.spacing.unit * 4}px 0 ${theme.spacing.unit * 2}px`,
   },
+  footer: {
+    padding: "5px 10px"
+  },
 });
-
-const URL = "http://127.0.0.1:5000"
 
 class ContentManualDownload extends React.Component {
   state = {
-    items: [],
+    items: []
   };
 
   validate() {
@@ -50,27 +57,37 @@ class ContentManualDownload extends React.Component {
     return "";
   }
 
+  refresh() {
+    fetch(Config.API_SERVER_URL + "/downloads", {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(res => res.json())
+    .then(
+      (result) => {
+        this.setState({
+          items: result.items
+        });
+      },
+      (error) => {
+        this.setState({
+          items: []
+        });
+      }
+    );
+  };
+
   componentDidMount() {
-    fetch(URL + "/downloads", {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      })
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            items: result
-          });
-        },
-        (error) => {
-          this.setState({
-            items: []
-          });
-        }
-      )
+    this.refresh();
+
+    this.interval = setInterval(() => this.refresh(), Config.DOWNLOADS_REFRESH_TIME);
+  };
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   };
 
 
@@ -86,6 +103,10 @@ class ContentManualDownload extends React.Component {
         icon = <ErrorIcon />
       } else if(element.status === "RUNNING"){
         icon = <CachedIcon />
+      } else if(element.status === "CANCELLED"){
+        icon = <CancelIcon />
+      } else if(element.status === "STOPPED"){
+        icon = <QueryBuilderIcon />
       }
 
       return (
@@ -124,9 +145,19 @@ class ContentManualDownload extends React.Component {
                             <TableBody>
                               {rows}
                             </TableBody>
+                            <TableFooter className={classes.footer}>    
+                              <TableRow>
+                                <TableCell>
+                                  <Button size="small" variant="contained" onClick={() => this.refresh()}>
+                                    <RefreshIcon/>
+                                    Refresh
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            </TableFooter>
                           </Table> 
                         </Grid>
-                    </Grid>
+                    </Grid>                   
                 </div>
             </Typography>
         </main>

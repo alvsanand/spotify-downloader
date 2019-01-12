@@ -12,7 +12,6 @@ import CheckBox from '@material-ui/icons/CheckBox';
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    maxWidth: "60%",
   },
   content: {
     flexGrow: 1,

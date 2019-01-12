@@ -115,4 +115,4 @@ venv.bak/
 
 # react-ui
 node_modules
-webapp/static
+static

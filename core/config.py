@@ -1,4 +1,4 @@
-from core import internals, const
+from core import const
 from collections import namedtuple
 
 log = const.log
@@ -17,7 +17,7 @@ default_conf = { 'spotify-downloader':
                  { 'manual'                 : False,
                    'no-metadata'            : False,
                    'avconv'                 : False,
-                   'folder'                 : internals.get_music_dir(),
+                   'folder'                 : "/music",
                    'overwrite'              : 'prompt',
                    'input-ext'              : '.m4a',
                    'output-ext'             : '.mp3',
@@ -30,7 +30,8 @@ default_conf = { 'spotify-downloader':
                    'search-format'          : '{artist} - {track_name} lyrics',
                    'youtube-api-key'        : None,
                    'log-level'              : 'INFO',
-                   'direct_download'        : False }
+                   'max_downloads'          : 2
+                   }
                }
 
 
@@ -67,4 +68,4 @@ def load_config():
     config['folder'] = os.path.relpath(config['folder'], os.getcwd())
     config['direct_download'] = True
 
-    return namedtuple("Employee", map(lambda k: k.replace("-", "_"), config.keys()))(*config.values())
+    return namedtuple("Config", map(lambda k: k.replace("-", "_"), config.keys()))(*config.values())

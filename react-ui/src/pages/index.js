@@ -12,8 +12,9 @@ import IconButton from '@material-ui/core/IconButton';
 import Badge from '@material-ui/core/Badge';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
+import Config from './config';
 import Menu from './menu';
 import Content from './content';
 import ContentMain from './content_main';
@@ -90,7 +91,8 @@ const styles = theme => ({
 class SpotifyDownloader extends React.Component {
   state = {
     open: true,
-    mainConent: <ContentMain />
+    mainConent: <ContentMain />,
+    runningDownloads: 0
   };
 
   handleDrawerOpen = () => {
@@ -101,8 +103,49 @@ class SpotifyDownloader extends React.Component {
     this.setState({ open: false });
   };
 
+  componentDidMount() {
+    this.refresh_downloads_badge();
+
+    this.interval = setInterval(() => this.refresh_downloads_badge(), Config.DOWNLOADS_BADGE_REFRESH_TIME);
+  };
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
+  };
+
   handleMainContent = (content) => {
     this.setState({ mainConent: content });
+  };
+
+  refresh_downloads_badge() {
+    fetch(Config.API_SERVER_URL + "/downloads", {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(res => res.json())
+    .then(
+      (result) => {
+        let runningDownloads = result.items.map((element, i) => {
+           if(element.status === "RUNNING"){
+            return 1;
+          } else {
+            return 0;
+          }
+        }).reduce((a,b)=> (a+b), 0);
+
+        this.setState({
+          runningDownloads: runningDownloads
+        });
+      },
+      (error) => {
+        this.setState({
+          runningDownloads: 0
+        });
+      }
+    );
   };
 
   render() {
@@ -137,8 +180,8 @@ class SpotifyDownloader extends React.Component {
               SpotifyDownloader
             </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
+              <Badge badgeContent={this.state.runningDownloads} color="secondary">
+                <CloudDownloadIcon />
               </Badge>
             </IconButton>
           </Toolbar>

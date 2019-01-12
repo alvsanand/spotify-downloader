@@ -12,11 +12,15 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import Badge from '@material-ui/core/Badge';
+import IconButton from '@material-ui/core/IconButton';
+import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+
+import Config from './config';
 
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    maxWidth: "60%",
   },
   button: {
     margin: theme.spacing.unit,
@@ -35,8 +39,6 @@ const styles = theme => ({
     margin: `${theme.spacing.unit * 4}px 0 ${theme.spacing.unit * 2}px`,
   },
 });
-
-const URL = "http://127.0.0.1:5000"
 
 class ContentManualDownload extends React.Component {
   state = {
@@ -64,7 +66,7 @@ class ContentManualDownload extends React.Component {
       return;
     }
 
-    fetch(URL + "/download", {
+    fetch(Config.API_SERVER_URL + "/download", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -77,9 +79,86 @@ class ContentManualDownload extends React.Component {
       .then(res => res.json())
       .then(
         (result) => {
+          if (result.status === "OK"){
+            this.setState({
+              dialogOpen: true,
+              dialogText: "We have added successfully the URL to the download queue."
+            });
+          } else if (result.status === "ALREADY_ADDED"){
+            this.setState({
+              dialogOpen: true,
+              dialogText: "The URL is already in the download queue."
+            });
+          }
+        },
+        (error) => {
           this.setState({
             dialogOpen: true,
-            dialogText: "We have added successfully the URL to the download queue."
+            dialogText: "Error while adding the URL to the download queue."
+          });
+        }
+      )
+  };
+
+  getInfo = (evt) => {
+    const { classes } = this.props;
+
+    let validation_error = this.validate();
+    if(validation_error !== ""){
+      this.setState({
+        dialogOpen: true,
+        dialogText: "Validation error: " + validation_error
+      });
+
+      return;
+    }
+
+    fetch(Config.API_SERVER_URL + "/playlist_info", {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: this.state.url
+        })
+      })
+      .then(res => res.json())
+      .then(
+        (result) => {
+          let tracks = result.tracks.map((element, i) => {
+            return (
+              <ListItem alignItems="flex-start">
+                <IconButton aria-label="4 pending messages" className={classes.margin}>
+                  <Badge badgeContent={i} color="primary">
+                    <AudiotrackIcon />
+                  </Badge>
+                </IconButton>
+                <ListItemText
+                  primary={element.name}
+                  secondary={
+                    <React.Fragment>
+                      <Typography component="span" className={classes.inline} color="textPrimary">
+                        {element.artists}
+                      </Typography>
+                      {element.album}
+                    </React.Fragment>
+                  }
+                />
+              </ListItem>
+            )
+          });
+
+          this.setState({
+            dialogOpen: true,
+            dialogText:
+              <div>
+                <Typography variant="subtitle1">{result.name}</Typography>
+                <br />
+                <List component="nav" className={classes.root}>
+                  {tracks}
+                </List>
+              </div>
           });
         },
         (error) => {
@@ -128,22 +207,27 @@ class ContentManualDownload extends React.Component {
                                         </ListItemText>
                                     </ListItem>
                                     <ListItem>
-                                    <TextField
-                                        name="url"
-                                        label="Spotify URL"
-                                        style={{ margin: 8 }}
-                                        placeholder="https://open.spotify.com/user/spotify/..."
-                                        fullWidth
-                                        margin="normal"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        onChange={this.handleInputChange}
-                                        />
+                                      <TextField
+                                          name="url"
+                                          label="Spotify URL"
+                                          style={{ margin: 8 }}
+                                          placeholder="https://open.spotify.com/user/spotify/..."
+                                          fullWidth
+                                          margin="normal"
+                                          InputLabelProps={{
+                                              shrink: true,
+                                          }}
+                                          onChange={this.handleInputChange}
+                                          />
+                                    </ListItem>
+                                    <ListItem>
+                                      <Button variant="contained" color="secondary" className={classes.button} onClick={this.getInfo}>
+                                          Get Info
+                                      </Button>  
+                                      <Button variant="contained" color="primary" className={classes.button} onClick={this.submit}>
+                                          Download
+                                      </Button>   
                                     </ListItem>  
-                                    <Button variant="outlined" color="primary" className={classes.button} onClick={this.submit}>
-                                        Download
-                                    </Button>     
                                 </List>
                             </div>
                         </Grid>

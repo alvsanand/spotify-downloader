@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
+import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 import ContentMain from './content_main';
 import ContentManualDownload from './content_manualDownload';
@@ -19,11 +20,12 @@ export const MenuContents = [
     },
     {
       content: <ContentManualDownload />,
-      text: 'Manual Download'
+      text: 'Manual Download',
     },
     {
       content: <ContentDownloads />,
-      text: 'Downloads'
+      text: 'Downloads',
+      icon: <CloudDownloadIcon />
     }
   ];
 

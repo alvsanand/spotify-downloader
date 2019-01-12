@@ -1,40 +1,41 @@
 from core import const
 from core.const import log
 from core import youtube_tools
-from core import handle
+from core import config
 
 from flask import Flask, render_template, redirect
-from webapp.routes import app as routes
-from flask_cors import CORS
 import os
-from core.const import log
+
 
 def init():
-    log.info("Launching spotwebapp")
+    log.info("Launching Spotify-Downloader")
 
-    const.args = handle.load_config()
-    
+    const.config = config.load_config()
+
     const.log = const.logzero.setup_logger(formatter=const._formatter,
-                                           level=const.args.log_level)
+                                           level=const.config.log_level)
     youtube_tools.set_api_key()
 
 
-init()
+def main():
+    init()
 
-log.info("Launching Flash app")
+    from api.routes import app as routes
 
-app = Flask(__name__, static_url_path='')
-# Delete only for dev
-CORS(app)
+    log.info("Launching Flash app")
 
-SECRET_KEY = os.urandom(32)
-app.config['SECRET_KEY'] = SECRET_KEY
+    app = Flask(__name__, static_url_path='')
 
-app.register_blueprint(routes, url_prefix='/')
+    SECRET_KEY = os.urandom(32)
+    app.config['SECRET_KEY'] = SECRET_KEY
 
-log.info("Loaded routes")
-log.info(app.url_map)
+    app.register_blueprint(routes, url_prefix='/')
 
-app.run(debug = True, threaded=True)
+    log.info("Loaded routes")
+    log.info(app.url_map)
 
-    
+    app.run(host='0.0.0.0', threaded=True)
+
+
+if __name__ == "__main__":
+    main()

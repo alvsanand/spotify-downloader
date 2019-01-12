@@ -72,7 +72,7 @@ def format_string(string_format, tags, slugification=False, force_spaces=False):
         string_format = string_format.replace(format_tag,
                                               format_tags[x])
 
-    if const.args.no_spaces and not force_spaces:
+    if const.config.no_spaces and not force_spaces:
         string_format = string_format.replace(' ', '_')
 
     return string_format
@@ -81,7 +81,7 @@ def format_string(string_format, tags, slugification=False, force_spaces=False):
 def sanitize_title(title, ok='-_()[]{}\/'):
     """ Generate filename of the song to be downloaded. """
 
-    if const.args.no_spaces:
+    if const.config.no_spaces:
         title = title.replace(' ', '_')
 
     # slugify removes any special characters
@@ -134,27 +134,3 @@ def get_splits(url):
     else:
         splits = url.split(':')
     return splits
-
-
-# a hacky way to user's localized music directory
-# (thanks @linusg, issue #203)
-def get_music_dir():
-    home = os.path.expanduser('~')
-
-    # On Linux, the localized folder names are the actual ones.
-    # It's a freedesktop standard though.
-    if sys.platform.startswith('linux'):
-        for file_item in ('.config/user-dirs.dirs', 'user-dirs.dirs'):
-            path = os.path.join(home, file_item)
-            if os.path.isfile(path):
-                with open(path, 'r') as f:
-                    for line in f:
-                        if line.startswith('XDG_MUSIC_DIR'):
-                            return os.path.expandvars(line.strip().split('=')[1].strip('"'))
-
-    # On both Windows and macOS, the localized folder names you see in
-    # Explorer and Finder are actually in English on the file system.
-    # So, defaulting to C:\Users\<user>\Music or /Users/<user>/Music
-    # respectively is sufficient.
-    # On Linux, default to /home/<user>/Music if the above method failed.
-    return os.path.join(home, 'Music')

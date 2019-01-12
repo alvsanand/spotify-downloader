@@ -1,16 +1,25 @@
 FROM python:3.6-alpine
 
 RUN apk add --no-cache \
-    ffmpeg
+    ffmpeg nodejs nodejs-npm
+
+ADD react-ui/ /spotify-downloader/react-ui
+RUN cd /spotify-downloader/react-ui \
+    && npm install \
+    && npm run build \
+    && cp -R build/ ../static \
+    && cd / \
+    && rm -Rf  /spotify-downloader/react-ui
 
 ADD requirements.txt /spotify-downloader/
 RUN pip install -r /spotify-downloader/requirements.txt
-RUN rm /spotify-downloader/requirements.txt
 
-ADD spotdl.py /spotify-downloader/
+ADD app.py /spotify-downloader/
 ADD core/ /spotify-downloader/core
+ADD api/ /spotify-downloader/api
 
-RUN mkdir /music
-WORKDIR /music
+RUN chmod a+rw /spotify-downloader
 
-ENTRYPOINT ["python3", "/spotify-downloader/spotdl.py", "-f", "/music"]
+WORKDIR /spotify-downloader
+
+ENTRYPOINT ["python", "app.py"]

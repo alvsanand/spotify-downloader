@@ -16,8 +16,8 @@ pafy.g.opener.addheaders.append(('Range', 'bytes=0-'))
 
 
 def set_api_key():
-    if const.args.youtube_api_key:
-        key = const.args.youtube_api_key
+    if const.config.youtube_api_key:
+        key = const.config.youtube_api_key
     else:
         # Please respect this YouTube token :)
         key = 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0'
@@ -97,7 +97,7 @@ def is_video(result):
 
 def generate_youtube_url(raw_song, meta_tags):
     url_fetch = GenerateYouTubeURL(raw_song, meta_tags)
-    if const.args.youtube_api_key:
+    if const.config.youtube_api_key:
         url = url_fetch.api()
     else:
         url = url_fetch.scrape()
@@ -112,7 +112,7 @@ class GenerateYouTubeURL:
         if meta_tags is None:
             self.search_query = raw_song
         else:
-            self.search_query = internals.format_string(const.args.search_format,
+            self.search_query = internals.format_string(const.config.search_format,
                                                         meta_tags, force_spaces=True)
 
     def _best_match(self, videos):
@@ -193,7 +193,7 @@ class GenerateYouTubeURL:
                   'maxResults' :  50,
                   'type'       : 'video' }
 
-        if const.args.music_videos_only:
+        if const.config.music_videos_only:
             query['videoCategoryId'] = '10'
 
         if not self.meta_tags:

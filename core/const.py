@@ -1,6 +1,6 @@
 import logzero
 
-_log_format = ("%(color)s%(levelname)s:%(end_color)s %(message)s")
+_log_format = ("%(color)s%(asctime)s %(levelname)s %(processName)s%(end_color)s %(message)s")
 _formatter = logzero.LogFormatter(fmt=_log_format)
 
 # options
