@@ -58,6 +58,7 @@ class Downloader:
             log.info("Finished Downloader")
         except Exception:
             log.error("Error in Downloader", exc_info=True)
+            raise Exception("Error in Downloader")
 
     def getStatus(self):
         if not self.future:

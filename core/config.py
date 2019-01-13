@@ -17,24 +17,27 @@ _LOG_LEVELS_STR = ['INFO', 'WARNING', 'ERROR', 'DEBUG']
 
 _default_conf = {
                 'spotify_downloader': {
-                        'no_metadata'            : False,
                         'avconv'                 : False,
-                        'folder'                 : "/music",
-                        'overwrite'              : 'prompt',
-                        'input_ext'              : '.m4a',
-                        'output_ext'             : '.mp3',
-                        'trim_silence'           : False,
                         'download_only_metadata' : False,
                         'file_format'            : '{number}_{artist}_{track_name}',
+                        'folder'                 : "/music",
+                        'input_ext'              : '.m4a',
+                        'log_level'              : 'INFO',
+                        'max_downloads'          : 2,
+                        'music_videos_only'      : False,
+                        'no_metadata'            : False,
+                        'no_spaces'              : False,
+                        'output_ext'             : '.mp3',
+                        'overwrite'              : 'prompt',
+                        'search_format'          : '{artist} - {track_name} lyrics',
                         # Generate the token. Please respect these credentials :)
                         'spotify_auth'           : {
                             'client_id'             : '4fe3fecfe5334023a1472516cc99d805',
                             'client_secret'         : '0f02b7c483c04257984695007a4a8d5c'
                         },
+                        'trim_silence'           : False,
                         # Generate the token. Please respect these credentials :)
-                        'youtube_api_key'        : 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB_7wzYp0',
-                        'log_level'              : 'INFO',
-                        'max_downloads'          : 2
+                        'youtube_api_key'        : 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0',
                 }
             }
 

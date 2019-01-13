@@ -78,9 +78,12 @@ class ContentManualDownload extends React.Component {
     if(validation_error !== ""){
       this.setState({
         dialogOpen: true,
-        dialogText:  <Typography >
-        <ErrorIcon/> "Validation error: {validation_error}
-      </Typography>
+        dialogContent:
+          <DialogContent>
+              <DialogContentText id="alert-dialog-description" className={classes.error}>
+                    <ErrorIcon className={classes.icon}/> Validation error: {validation_error}
+              </DialogContentText>
+          </DialogContent>
       });
 
       return;
@@ -142,7 +145,12 @@ class ContentManualDownload extends React.Component {
     if(validation_error !== ""){
       this.setState({
         dialogOpen: true,
-        dialogText: "Validation error: " + validation_error
+        dialogContent:
+          <DialogContent>
+              <DialogContentText id="alert-dialog-description" className={classes.error}>
+                    <ErrorIcon className={classes.icon}/> Validation error: {validation_error}
+              </DialogContentText>
+          </DialogContent>
       });
 
       return;
@@ -186,20 +194,25 @@ class ContentManualDownload extends React.Component {
 
           this.setState({
             dialogOpen: true,
-            dialogText:
-              <div>
+            dialogContent:
+              <DialogContent>
                 <Typography variant="subtitle1">{result.name}</Typography>
                 <br />
                 <List component="nav" className={classes.root}>
                   {tracks}
                 </List>
-              </div>
+              </DialogContent>
           });
         },
         (error) => {
           this.setState({
             dialogOpen: true,
-            dialogText: "Error while adding the URL to the download queue."
+            dialogContent:
+              <DialogContent>
+                  <DialogContentText id="alert-dialog-description" className={classes.error}>
+                    <ErrorIcon className={classes.icon}/> Error while getting info about the URL.
+                  </DialogContentText>
+              </DialogContent>
           });
         }
       )
@@ -228,7 +241,7 @@ class ContentManualDownload extends React.Component {
         <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <Typography variant="h4" gutterBottom component="h2">
-            Manual Download
+            Download
             </Typography>
             <Typography component="div" className={classes.mainContainer}>
                 <Paper>

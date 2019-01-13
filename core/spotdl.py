@@ -163,9 +163,6 @@ def download_single(folder, raw_song, number=None):
         log.warning('Could not find metadata')
         songname = internals.sanitize_title(songname)
 
-    if const.config.dry_run:
-        return
-
     if not check_exists(folder, songname, raw_song, meta_tags):
         # deal with file formats containing slashes to non-existent directories
         songpath = os.path.join(folder, os.path.dirname(songname))

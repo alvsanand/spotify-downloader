@@ -30,9 +30,9 @@ def post_download():
     if not request.json or not 'url' in request.json:
         abort({'error': 'Error downloading playlist info: url obligatory'}, 400)
 
-    url = request.json['url']
-
     try:
+        url = request.json['url']
+
         log.info("Downloading url[%s]", url)
 
         if url not in current_downloads:
@@ -57,13 +57,13 @@ def playlist_info():
         abort({'error': 'Error getting playlist info: url obligatory'}, 400)
 
     try:
-        log.info("Get playlist info[%s]", url)
-
         url = request.json['url']
 
-        log.info("Downloading url[%s]", url)
+        log.info("Get playlist info[%s]", url)
 
-        return jsonify(spotdl.fetch_playlist_info(url))
+        info = spotdl.fetch_playlist_info(url)
+
+        return jsonify(info)
     except:
         log.error("Error getting playlist info", exc_info=True)
 

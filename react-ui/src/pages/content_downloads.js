@@ -129,7 +129,7 @@ class ContentManualDownload extends React.Component {
         <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <Typography variant="h4" gutterBottom component="h2">
-            Downloads
+            Download History
             </Typography>
             <Typography component="div" className={classes.mainContainer}>
                 <Paper>

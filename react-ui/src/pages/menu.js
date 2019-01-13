@@ -8,33 +8,35 @@ import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
 import SettingsIcon from '@material-ui/icons/Settings';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
 
 import ContentMain from './content_main';
 import ContentManualDownload from './content_manualDownload';
 import ContentDownloads from './content_downloads';
 import SettingsConfig from './content_settings';
 
-export const MenuContents = [
-    {
+export const MenuContents = {
+    "ContentMain": {
       content: <ContentMain />,
       text: 'Main',
       icon: <HomeIcon />
     },
-    {
+    "ContentManualDownload": {
       content: <ContentManualDownload />,
-      text: 'Manual Download',
+      text: 'Download',
+      icon: <AddCircleIcon />
     },
-    {
+    "ContentDownloads": {
       content: <ContentDownloads />,
-      text: 'Downloads',
+      text: 'Download History',
       icon: <CloudDownloadIcon />
     },
-    {
+    "SettingsConfig": {
       content: <SettingsConfig />,
       text: 'Settings',
       icon: <SettingsIcon />
     }
-  ];
+  };
 
 const styles = theme => ({
   root: {
@@ -49,7 +51,8 @@ class Menu extends React.Component {
   render() {
     const { classes } = this.props;
 
-    let elements = MenuContents.map((element, i) => {
+    let elements = Object.keys(MenuContents).map((key, i) => {
+        let element = MenuContents[key]
         let icon
         if(element.icon){
           icon = (

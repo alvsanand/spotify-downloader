@@ -16,6 +16,7 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 import Config from './config';
 import Menu from './menu';
+import {MenuContents} from './menu';
 import Content from './content';
 import ContentMain from './content_main';
 
@@ -180,7 +181,7 @@ class SpotifyDownloader extends React.Component {
               SpotifyDownloader
             </Typography>
             <IconButton color="inherit">
-              <Badge badgeContent={this.state.runningDownloads} color="secondary">
+              <Badge badgeContent={this.state.runningDownloads} onClick={()=>this.handleMainContent(MenuContents["ContentDownloads"].content)} color="secondary">
                 <CloudDownloadIcon />
               </Badge>
             </IconButton>
