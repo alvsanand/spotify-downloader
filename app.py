@@ -10,11 +10,7 @@ import os
 def init():
     log.info("Launching Spotify-Downloader")
 
-    const.config = config.load_config()
-
-    const.log = const.logzero.setup_logger(formatter=const._formatter,
-                                           level=const.config.log_level)
-    youtube_tools.set_api_key()
+    config.init_config()
 
 
 def main():
@@ -34,7 +30,13 @@ def main():
     log.info("Loaded routes")
     log.info(app.url_map)
 
-    app.run(host='0.0.0.0', threaded=True)
+    threaded = True
+    if os.getenv('LOCAL_MODE', "false").lower() == "true":
+        from flask_cors import CORS
+        CORS(app)
+        threaded = False
+
+    app.run(host='0.0.0.0', threaded=threaded)
 
 
 if __name__ == "__main__":

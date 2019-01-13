@@ -15,18 +15,24 @@ import sys
 import shutil
 
 
-def generate_token():
-    """ Generate the token. Please respect these credentials :) """
-    credentials = oauth2.SpotifyClientCredentials(
-        client_id='4fe3fecfe5334023a1472516cc99d805',
-        client_secret='0f02b7c483c04257984695007a4a8d5c')
-    token = credentials.get_access_token()
-    return token
+token = None
+spotify = None
 
-# token is mandatory when using Spotify's API
-# https://developer.spotify.com/news-stories/2017/01/27/removing-unauthenticated-calls-to-the-web-api/
-token = generate_token()
-spotify = spotipy.Spotify(auth=token)
+
+def init():
+    global token, spotify
+
+    token = _generate_token()
+    spotify = spotipy.Spotify(auth=token)
+
+def _generate_token():
+    credentials = oauth2.SpotifyClientCredentials(
+        client_id=const.config.spotify_auth.client_id,
+        client_secret=const.config.spotify_auth.client_secret)
+
+    token = credentials.get_access_token()
+
+    return token
 
 
 def generate_metadata(raw_song):

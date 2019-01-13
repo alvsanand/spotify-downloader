@@ -8,6 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import CheckBox from '@material-ui/icons/CheckBox';
+import { Paper } from '@material-ui/core';
 
 const styles = theme => ({
   root: {
@@ -20,9 +21,6 @@ const styles = theme => ({
     overflow: 'auto',
   },
   appBarSpacer: theme.mixins.toolbar,
-  demo: {
-    backgroundColor: theme.palette.background.paper,
-  },
   title: {
     margin: `${theme.spacing.unit * 4}px 0 ${theme.spacing.unit * 2}px`,
   },
@@ -45,10 +43,9 @@ class ContentMain extends React.Component {
                 Main
             </Typography>
             <Typography component="div" className={classes.mainContainer}>
-                <div className={classes.root}>
-                <Grid container spacing={16}>
-                    <Grid item xs={12} md={12}>
-                        <div className={classes.demo}>
+                <Paper>
+                    <Grid container spacing={16}>
+                        <Grid item xs={12} md={12}>
                             <List dense={dense}>
                                 <ListItem>
                                     <ListItemText>
@@ -70,67 +67,67 @@ class ContentMain extends React.Component {
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Title</ListItemText>
+                                    <ListItemText>Title</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Artist</ListItemText>
+                                    <ListItemText>Artist</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Album</ListItemText>
+                                    <ListItemText>Album</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Album art</ListItemText>
+                                    <ListItemText>Album art</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Lyrics (if found on http://lyrics.wikia.com)</ListItemText>
+                                    <ListItemText>Lyrics (if found on http://lyrics.wikia.com)</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Album artist</ListItemText>
+                                    <ListItemText>Album artist</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Genre</ListItemText>
+                                    <ListItemText>Genre</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Track number</ListItemText>
+                                    <ListItemText>Track number</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Disc number</ListItemText>
+                                    <ListItemText>Disc number</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>Release date</ListItemText>
+                                    <ListItemText>Release date</ListItemText>
                                     </ListItem>
                                     <ListItem className={classes.nested}>
                                         <ListItemIcon>
                                             <CheckBox />
                                         </ListItemIcon>
-                                       <ListItemText>And more...</ListItemText>
+                                    <ListItemText>And more...</ListItemText>
                                     </ListItem>
                                 </List>
                                 <ListItem>
@@ -139,10 +136,9 @@ class ContentMain extends React.Component {
                                     </ListItemText>
                                 </ListItem>
                             </List>
-                        </div>
+                        </Grid>
                     </Grid>
-                </Grid>
-                </div>
+                </Paper>
             </Typography>
         </main>
     );

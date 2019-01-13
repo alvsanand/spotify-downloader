@@ -44,10 +44,10 @@ class Converter:
         command = ['avconv', '-loglevel', level, '-i',
                    self.input_file, '-ab', '192k',
                    self.output_file, '-y']
-        
+
         if self.trim_silence:
             log.warning('--trim-silence not supported with avconv')
-        
+
         log.debug(command)
         return subprocess.call(command)
 
@@ -80,10 +80,10 @@ class Converter:
         # add common params for any of the above combination
         ffmpeg_params += '-b:a 192k -vn '
         ffmpeg_pre += ' -i'
-        
+
         if self.trim_silence:
             ffmpeg_params += '-af silenceremove=start_periods=1 '
-        
+
         command = ffmpeg_pre.split() + [self.input_file] + ffmpeg_params.split() + [self.output_file]
 
         log.debug(command)

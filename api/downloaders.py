@@ -15,7 +15,15 @@ class DownloadStatus(Enum):
     ERROR = "ERROR"
 
 
-downloaders = thread.ThreadPoolExecutor(int(const.config.max_downloads))
+_downloadersThreadPool = None
+
+
+def init():
+    global _downloadersThreadPool
+
+    if _downloadersThreadPool:
+        _downloadersThreadPool.shutdown()
+    _downloadersThreadPool = thread.ThreadPoolExecutor(int(const.config.max_downloads))
 
 
 class Downloader:
@@ -25,7 +33,7 @@ class Downloader:
     def start(self):
         log.info("Starting PlayListDownloader")
 
-        self.future = downloaders.submit(self.run)
+        self.future = _downloadersThreadPool.submit(self.run)
 
     def stop(self):
         log.info("Stopping PlayListDownloader")

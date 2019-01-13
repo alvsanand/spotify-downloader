@@ -15,13 +15,8 @@ log = const.log
 pafy.g.opener.addheaders.append(('Range', 'bytes=0-'))
 
 
-def set_api_key():
-    if const.config.youtube_api_key:
-        key = const.config.youtube_api_key
-    else:
-        # Please respect this YouTube token :)
-        key = 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0'
-    pafy.set_api_key(key)
+def init():
+    pafy.set_api_key(const.config.youtube_api_key)
 
 
 def go_pafy(raw_song, meta_tags=None):

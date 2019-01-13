@@ -6,11 +6,13 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HomeIcon from '@material-ui/icons/Home';
+import SettingsIcon from '@material-ui/icons/Settings';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 import ContentMain from './content_main';
 import ContentManualDownload from './content_manualDownload';
 import ContentDownloads from './content_downloads';
+import SettingsConfig from './content_settings';
 
 export const MenuContents = [
     {
@@ -26,6 +28,11 @@ export const MenuContents = [
       content: <ContentDownloads />,
       text: 'Downloads',
       icon: <CloudDownloadIcon />
+    },
+    {
+      content: <SettingsConfig />,
+      text: 'Settings',
+      icon: <SettingsIcon />
     }
   ];
 
@@ -53,7 +60,7 @@ class Menu extends React.Component {
         }
 
         return (
-          <ListItem button onClick={()=>this.props.changeContent(element.content)}  key={i}>    
+          <ListItem button onClick={()=>this.props.changeContent(element.content)}  key={i}>
             {icon}
             <ListItemText inset={true} primary={element.text}/>
           </ListItem>

@@ -15,6 +15,10 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Badge from '@material-ui/core/Badge';
 import IconButton from '@material-ui/core/IconButton';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import ErrorIcon from '@material-ui/icons/Error';
+import DoneIcon from '@material-ui/icons/Done';
+import green from '@material-ui/core/colors/green';
+import { Paper } from '@material-ui/core';
 
 import Config from './config';
 
@@ -38,6 +42,18 @@ const styles = theme => ({
   title: {
     margin: `${theme.spacing.unit * 4}px 0 ${theme.spacing.unit * 2}px`,
   },
+  icon: {
+      position: "relative",
+      top: theme.spacing.unit,
+      width: theme.typography.display1.fontSize,
+      height: theme.typography.display1.fontSize
+  },
+  success: {
+    color: green[600],
+  },
+  error: {
+    color: theme.palette.error.dark,
+  }
 });
 
 class ContentManualDownload extends React.Component {
@@ -51,16 +67,20 @@ class ContentManualDownload extends React.Component {
     if (!this.state.url || !/^https:\/\/open.spotify.com\/.+$/i.test(this.state.url)) {
       return 'Please enter a valid url'
     }
-    
+
     return "";
   }
 
   submit = (evt) => {
+    const { classes } = this.props;
+    
     let validation_error = this.validate();
     if(validation_error !== ""){
       this.setState({
         dialogOpen: true,
-        dialogText: "Validation error: " + validation_error
+        dialogText:  <Typography >
+        <ErrorIcon/> "Validation error: {validation_error}
+      </Typography>
       });
 
       return;
@@ -82,19 +102,34 @@ class ContentManualDownload extends React.Component {
           if (result.status === "OK"){
             this.setState({
               dialogOpen: true,
-              dialogText: "We have added successfully the URL to the download queue."
+              dialogContent:
+              <DialogContent>
+                    <DialogContentText id="alert-dialog-description" className={classes.success}>
+                      <DoneIcon className={classes.icon}/> We have added successfully the URL to the download queue.
+                    </DialogContentText>
+                </DialogContent>
             });
           } else if (result.status === "ALREADY_ADDED"){
             this.setState({
               dialogOpen: true,
-              dialogText: "The URL is already in the download queue."
+              dialogContent:
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description" className={classes.error}>
+                      <ErrorIcon className={classes.icon}/> The URL is already in the download queue.
+                    </DialogContentText>
+                </DialogContent>
             });
           }
         },
         (error) => {
           this.setState({
             dialogOpen: true,
-            dialogText: "Error while adding the URL to the download queue."
+            dialogContent:
+              <DialogContent>
+                  <DialogContentText id="alert-dialog-description" className={classes.error}>
+                    <ErrorIcon className={classes.icon}/> Error while adding the URL to the download queue.
+                  </DialogContentText>
+              </DialogContent>
           });
         }
       )
@@ -196,7 +231,7 @@ class ContentManualDownload extends React.Component {
             Manual Download
             </Typography>
             <Typography component="div" className={classes.mainContainer}>
-                <div className={classes.root}>
+                <Paper>
                     <Grid container spacing={24}>
                         <Grid item xs={12}>
                             <div className={classes.demo}>
@@ -209,9 +244,10 @@ class ContentManualDownload extends React.Component {
                                     <ListItem>
                                       <TextField
                                           name="url"
+                                          variant="outlined"
                                           label="Spotify URL"
                                           style={{ margin: 8 }}
-                                          placeholder="https://open.spotify.com/user/spotify/..."
+                                          placeholder="https://open.spotify.com/..."
                                           fullWidth
                                           margin="normal"
                                           InputLabelProps={{
@@ -223,16 +259,16 @@ class ContentManualDownload extends React.Component {
                                     <ListItem>
                                       <Button variant="contained" color="secondary" className={classes.button} onClick={this.getInfo}>
                                           Get Info
-                                      </Button>  
+                                      </Button>
                                       <Button variant="contained" color="primary" className={classes.button} onClick={this.submit}>
                                           Download
-                                      </Button>   
-                                    </ListItem>  
+                                      </Button>
+                                    </ListItem>
                                 </List>
                             </div>
                         </Grid>
                     </Grid>
-                </div>
+                </Paper>
             </Typography>
             <Dialog
                 open={this.state.dialogOpen}
@@ -240,11 +276,7 @@ class ContentManualDownload extends React.Component {
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
                 >
-                <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                    {this.state.dialogText}
-                    </DialogContentText>
-                </DialogContent>
+                {this.state.dialogContent}
                 <DialogActions>
                     <Button onClick={this.handleDialogClose} color="primary">
                     Close

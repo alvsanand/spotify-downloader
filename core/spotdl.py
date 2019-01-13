@@ -66,8 +66,7 @@ def download_list(folder, songs):
         except spotipy.client.SpotifyException:
             # refresh token when it expires
             log.debug('Token expired, generating new one and authorizing')
-            new_token = spotify_tools.generate_token()
-            spotify_tools.spotify = spotipy.Spotify(auth=new_token)
+            spotify_tools.init()
             download_single(raw_song, number=number)
         # detect network problems
         except (urllib.request.URLError, TypeError, IOError):
@@ -105,7 +104,7 @@ def fetch_playlist_info(url):
                             map(lambda a: a['name'] , s['track']['artists'])
                         ),
                         'album':  s['track']['album']['name']
-                    }            
+                    }
                     , playlist['tracks']['items']))
 
     info = {

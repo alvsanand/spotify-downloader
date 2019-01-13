@@ -5,7 +5,7 @@ const styles = theme => ({
 });
 
 class Content extends React.Component {
-    render() {        
+    render() {
         return this.props.content
     }
 }

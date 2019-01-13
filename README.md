@@ -25,8 +25,35 @@ That's how your music library will look like!
 ## Installation
 
 ```
-$ docker build -t alvsanand/spotify-downloader .
+docker build -t alvsanand/spotify-downloader .
 ```
+
+## Development
+
+Un order to run in development mode:
+
+- Start Flask server:
+
+    ```
+    python3 -m venv env
+
+    source env/bin/activate
+
+    pip install -r requirements.txt
+
+    source env/bin/activate
+
+    export LOCAL_MODE=True
+
+    python app.py
+    ```
+- Start react server:
+
+    ```
+    cd react-ui
+    npm install
+    npm run start
+    ```
 
 ## Usage
 
@@ -34,23 +61,19 @@ $ docker build -t alvsanand/spotify-downloader .
 
     ```
     MUSIC_FOLDER={YOUR_MUSIC_DIRECTORY}
-    $ docker run --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
+    docker run --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
     ```
-- For accessing the UI, go to [http://localhost:5000](http://localhost:5000). 
+- For accessing the UI, go to [http://localhost:5000](http://localhost:5000).
 - In order to see the logs:
 
     ```
-    $ docker logs $(docker ps -aq --filter name=spotify-downloader)
+    docker logs $(docker ps -aq --filter name=spotify-downloader)
     ```
-
-
-
-
 
 ## Running Tests
 
 ```
-$ python3 -m pytest test
+python3 -m pytest test
 ```
 
 Obviously this requires the `pytest` module to be installed.

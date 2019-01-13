@@ -16,6 +16,7 @@ import CancelIcon from '@material-ui/icons/Cancel';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
 import Button from '@material-ui/core/Button';
+import { Paper } from '@material-ui/core';
 
 import Config from './config';
 
@@ -53,7 +54,7 @@ class ContentManualDownload extends React.Component {
     if (!this.state.url || !/^https:\/\/open.spotify.com\/user\/spotify\/.+$/i.test(this.state.url)) {
       return 'Please enter a valid url'
     }
-    
+
     return "";
   }
 
@@ -131,7 +132,7 @@ class ContentManualDownload extends React.Component {
             Downloads
             </Typography>
             <Typography component="div" className={classes.mainContainer}>
-                <div className={classes.root}>
+                <Paper>
                     <Grid container spacing={24}>
                         <Grid item xs={12}>
                           <Table className={classes.table}>
@@ -145,7 +146,7 @@ class ContentManualDownload extends React.Component {
                             <TableBody>
                               {rows}
                             </TableBody>
-                            <TableFooter className={classes.footer}>    
+                            <TableFooter className={classes.footer}>
                               <TableRow>
                                 <TableCell>
                                   <Button size="small" variant="contained" onClick={() => this.refresh()}>
@@ -155,10 +156,10 @@ class ContentManualDownload extends React.Component {
                                 </TableCell>
                               </TableRow>
                             </TableFooter>
-                          </Table> 
+                          </Table>
                         </Grid>
-                    </Grid>                   
-                </div>
+                    </Grid>
+                </Paper>
             </Typography>
         </main>
     );
