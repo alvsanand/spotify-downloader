@@ -75,7 +75,7 @@ class Downloader:
             return DownloadStatus.STOPPED
 
 
-class PlayListDownloader(Downloader):
+class SpotifyDownloader(Downloader):
     def __init__(self, url):
         super().__init__()
 
@@ -88,7 +88,7 @@ class PlayListDownloader(Downloader):
             return ''
 
     def download(self):
-        playlist_name, songs = spotdl.fetch_playlist(self.url)
+        playlist_name, songs = spotdl.fetch(self.url)
 
         self.name = playlist_name
 

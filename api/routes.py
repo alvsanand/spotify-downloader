@@ -2,7 +2,7 @@ from flask_cors import CORS
 from flask import Blueprint, redirect, request
 from flask import abort, jsonify
 
-from api.downloaders import PlayListDownloader
+from api.downloaders import SpotifyDownloader
 
 from core import config
 from core import const
@@ -36,7 +36,7 @@ def post_download():
         log.info("Downloading url[%s]", url)
 
         if url not in current_downloads:
-            downloader = PlayListDownloader(url)
+            downloader = SpotifyDownloader(url)
 
             downloader.start()
 
@@ -51,8 +51,8 @@ def post_download():
         abort({'error': 'Error downloading playlist info'}, 400)
 
 
-@app.route('/playlist_info', methods=['POST'])
-def playlist_info():
+@app.route('/info', methods=['POST'])
+def info():
     if not request.json or not 'url' in request.json:
         abort({'error': 'Error getting playlist info: url obligatory'}, 400)
 
@@ -61,7 +61,7 @@ def playlist_info():
 
         log.info("Get playlist info[%s]", url)
 
-        info = spotdl.fetch_playlist_info(url)
+        info = spotdl.fetch_info(url)
 
         return jsonify(info)
     except:
@@ -84,7 +84,7 @@ def downloads():
 
         response = {
             'items': items
-        }  
+        }
 
         return jsonify(response)
     except:
@@ -107,7 +107,6 @@ def get_settings():
         log.error("Error Retrieving settings", exc_info=True)
 
         abort({'error': 'Error Retrieving settings'}, 500)
-
 
 
 @app.route('/settings', methods=['PUT'])

@@ -15,6 +15,8 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import Badge from '@material-ui/core/Badge';
 import IconButton from '@material-ui/core/IconButton';
 import AudiotrackIcon from '@material-ui/icons/Audiotrack';
+import AlbumIcon from '@material-ui/icons/Album';
+import PlaylistPlayIcon from '@material-ui/icons/PlaylistPlay';
 import ErrorIcon from '@material-ui/icons/Error';
 import DoneIcon from '@material-ui/icons/Done';
 import green from '@material-ui/core/colors/green';
@@ -156,7 +158,7 @@ class ContentManualDownload extends React.Component {
       return;
     }
 
-    fetch(Config.API_SERVER_URL + "/playlist_info", {
+    fetch(Config.API_SERVER_URL + "/info", {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -192,11 +194,24 @@ class ContentManualDownload extends React.Component {
             )
           });
 
+          let typeIcon = ""
+          if(result.type=='ALBUM'){
+            typeIcon = <AlbumIcon/>
+          }
+          else if(result.type=='PLAYLIST'){
+            typeIcon = <PlaylistPlayIcon/>
+          }
+          else if(result.type=='TRACK'){
+            typeIcon = <AudiotrackIcon/>
+          }
+          
+          let title
+
           this.setState({
             dialogOpen: true,
             dialogContent:
               <DialogContent>
-                <Typography variant="subtitle1">{result.name}</Typography>
+                <Typography variant="subtitle1">{typeIcon} {result.name}</Typography>
                 <br />
                 <List component="nav" className={classes.root}>
                   {tracks}

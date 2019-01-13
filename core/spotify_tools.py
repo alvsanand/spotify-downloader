@@ -2,6 +2,7 @@ import spotipy
 import spotipy.oauth2 as oauth2
 import lyricwikia
 import os
+import re
 
 from core import const
 from core import internals
@@ -115,7 +116,21 @@ def get_playlists(username):
     return links
 
 
-def fetch_playlist(playlist):
+_ALBUM_RE =  re.compile("https://open.spotify.com/album/.+")
+_PLAYLIST_RE =  re.compile("https://open.spotify.com/user/.+")
+_TRACK_RE =  re.compile("https://open.spotify.com/track/.+")
+
+
+def fetch(url):
+    if _ALBUM_RE.match(url):
+        return _fetch_album(url), 'ALBUM'
+    elif _PLAYLIST_RE.match(url):
+        return _fetch_playlist(url), 'PLAYLIST'
+    elif _TRACK_RE.match(url):
+        return _fetch_track(url), 'TRACK'
+
+
+def _fetch_playlist(playlist):
     splits = internals.get_splits(playlist)
     try:
         username = splits[-3]
@@ -135,8 +150,24 @@ def fetch_playlist(playlist):
     return results
 
 
-def fetch_album(album):
+def _fetch_album(album):
     splits = internals.get_splits(album)
     album_id = splits[-1]
     album = spotify.album(album_id)
     return album
+
+
+def _fetch_track(track):
+    splits = internals.get_splits(track)
+    track_id = splits[-1]
+    track = spotify.track(track_id)
+
+    data = {
+        'name': track['name'],
+        'tracks': {
+            'items': [
+                track
+            ]
+        }
+    }
+    return data

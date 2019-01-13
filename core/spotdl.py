@@ -84,31 +84,46 @@ def download_list(folder, songs):
     return downloaded_songs
 
 
-def fetch_playlist(url):
-    playlist = spotify_tools.fetch_playlist(playlist=url)
+def _map_track_url(_track):
+    track = _track
+    if 'track' in _track:
+        track = _track['track']
 
-    playlist_name = playlist['name']
-    songs = list(map(lambda s: s['track']['external_urls']
-                     ['spotify'], playlist['tracks']['items']))
-
-    return playlist_name, songs
+    return track['external_urls']['spotify']
 
 
-def fetch_playlist_info(url):
-    playlist = spotify_tools.fetch_playlist(playlist=url)
+def fetch(url):
+    data, typ = spotify_tools.fetch(url)
 
-    playlist_name = playlist['name']
-    songs = list(map(lambda s: {
-                        'name': s['track']['name'],
-                        'artists': ", ".join(
-                            map(lambda a: a['name'] , s['track']['artists'])
-                        ),
-                        'album':  s['track']['album']['name']
-                    }
-                    , playlist['tracks']['items']))
+    list_name = data['name']
+    songs = list(map(lambda t: _map_track_url(t), data['tracks']['items']))
+
+    return list_name, songs
+
+
+def _map_track(_track, default_album):
+    track = _track
+    if 'track' in _track:
+        track = _track['track']
+
+    return {
+        'name': track['name'],
+        'artists': ", ".join(
+            map(lambda a: a['name'], track['artists'])
+        ),
+        'album':  track['album']['name'] if 'album' in track else default_album
+    }
+
+
+def fetch_info(url):
+    data, typ = spotify_tools.fetch(url)
+
+    list_name = data['name']
+    songs = list(map(lambda t: _map_track(t, list_name), data['tracks']['items']))
 
     info = {
-        'name': playlist_name,
+        'name': list_name,
+        'type': typ,
         'tracks': songs
     }
 
@@ -161,7 +176,7 @@ def download_single(folder, raw_song, number=None):
             songname = refined_songname
     else:
         log.warning('Could not find metadata')
-        songname = internals.sanitize_title(songname)
+        songname = internals.sanitize(songname)
 
     if not check_exists(folder, songname, raw_song, meta_tags):
         # deal with file formats containing slashes to non-existent directories

@@ -62,7 +62,7 @@ def format_string(string_format, tags, slugification=False, force_spaces=False):
 
     for tag in format_tags:
         if slugification:
-            format_tags[tag] = sanitize_title(format_tags[tag],
+            format_tags[tag] = sanitize(format_tags[tag],
                                               ok='-_()[]{}')
         else:
             format_tags[tag] = str(format_tags[tag])
@@ -78,14 +78,14 @@ def format_string(string_format, tags, slugification=False, force_spaces=False):
     return string_format
 
 
-def sanitize_title(title, ok='-_()[]{}\/'):
+def sanitize(title, ok='-_()[]{}\/'):
     """ Generate filename of the song to be downloaded. """
 
     if const.config.no_spaces:
         title = title.replace(' ', '_')
 
     # slugify removes any special characters
-    title = slugify(title, ok=ok, lower=False, spaces=True)
+    title = slugify(title, ok=ok, only_ascii=True, lower=False, spaces=True)
     return title
 
 

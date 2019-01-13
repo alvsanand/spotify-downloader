@@ -8,6 +8,8 @@ from core import const
 import os
 import pprint
 
+from fuzzywuzzy import fuzz
+
 log = const.log
 
 # Fix download speed throttle on short duration tracks
@@ -117,22 +119,38 @@ class GenerateYouTubeURL:
             result = videos[0]
             log.debug('Since no metadata found on Spotify, going with the first result')
         else:
-            # filter out videos that do not have a similar length to the Spotify song
-            duration_tolerance = 10
-            max_duration_tolerance = 20
-            possible_videos_by_duration = []
+            if const.config.match_by_string:
+                sanitize_search = internals.sanitize(self.search_query).lower()
 
-            # start with a reasonable duration_tolerance, and increment duration_tolerance
-            # until one of the Youtube results falls within the correct duration or
-            # the duration_tolerance has reached the max_duration_tolerance
-            while len(possible_videos_by_duration) == 0:
-                possible_videos_by_duration = list(filter(lambda x: abs(x['seconds'] - self.meta_tags['duration']) <= duration_tolerance, videos))
-                duration_tolerance += 1
-                if duration_tolerance > max_duration_tolerance:
-                    log.error("{0} by {1} was not found.\n".format(self.meta_tags['name'], self.meta_tags['artists'][0]['name']))
-                    return None
+                videos_with_ratio = list(map(lambda x: (
+                    fuzz.ratio(sanitize_search,
+                    internals.sanitize(x['title']).lower()), x
+                    ), videos))
 
-            result = possible_videos_by_duration[0]
+                sorted_videos_with_ratio = sorted(videos_with_ratio,
+                        key=lambda x: x[0], reverse=True)
+
+                result = sorted_videos_with_ratio[0][1]
+                
+                log.info('_best_match: {0} => {1}'.format(self.search_query, result['title']))
+            else:
+                # filter out videos that do not have a similar length to the Spotify song
+                duration_tolerance = 10
+                max_duration_tolerance = 20
+                possible_videos_by_duration = []
+                const.config.search_format.split(" ")
+
+                # start with a reasonable duration_tolerance, and increment duration_tolerance
+                # until one of the Youtube results falls within the correct duration or
+                # the duration_tolerance has reached the max_duration_tolerance
+                while len(possible_videos_by_duration) == 0:
+                    possible_videos_by_duration = list(filter(lambda x: abs(x['seconds'] - self.meta_tags['duration']) <= duration_tolerance, videos))
+                    duration_tolerance += 1
+                    if duration_tolerance > max_duration_tolerance:
+                        log.error("{0} by {1} was not found.\n".format(self.meta_tags['name'], self.meta_tags['artists'][0]['name']))
+                        return None
+
+                result = possible_videos_by_duration[0]
 
         if result:
             url = "http://youtube.com/watch?v={0}".format(result['link'])

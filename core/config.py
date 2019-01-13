@@ -23,13 +23,14 @@ _default_conf = {
                         'folder'                 : "/music",
                         'input_ext'              : '.m4a',
                         'log_level'              : 'INFO',
+                        'match_by_string'        : True,
                         'max_downloads'          : 2,
                         'music_videos_only'      : False,
                         'no_metadata'            : False,
                         'no_spaces'              : False,
                         'output_ext'             : '.mp3',
                         'overwrite'              : 'prompt',
-                        'search_format'          : '{artist} - {track_name} lyrics',
+                        'search_format'          : '{artist} - {track_name} song',
                         # Generate the token. Please respect these credentials :)
                         'spotify_auth'           : {
                             'client_id'             : '4fe3fecfe5334023a1472516cc99d805',
