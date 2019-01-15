@@ -5,6 +5,7 @@ from core import const
 from core.const import log
 
 from core import spotdl
+import time
 
 
 class DownloadStatus(Enum):
@@ -23,12 +24,15 @@ def init():
 
     if _downloadersThreadPool:
         _downloadersThreadPool.shutdown()
-    _downloadersThreadPool = thread.ThreadPoolExecutor(int(const.config.max_downloads))
+    _downloadersThreadPool = thread.ThreadPoolExecutor(
+        int(const.config.max_downloads))
 
 
 class Downloader:
     def __init__(self):
         self.future = None
+        self.init_date = None
+        self.end_date = None
 
     def start(self):
         log.info("Starting PlayListDownloader")
@@ -46,6 +50,16 @@ class Downloader:
     def getName(self):
         pass
 
+    def get_init_date(self, format=None):
+        if format and self.init_date:
+            return time.strftime(format, self.init_date)
+
+        return self.init_date
+
+    def get_end_date(self, format=None):
+        if format and self.end_date:
+            return time.strftime(format, self.end_date)
+
     def download(self):
         pass
 
@@ -53,11 +67,18 @@ class Downloader:
         log.info("Init Downloader")
 
         try:
+            self.init_date = time.localtime()
+
             self.download()
+
+            self.end_date = time.localtime()
 
             log.info("Finished Downloader")
         except Exception:
             log.error("Error in Downloader", exc_info=True)
+
+            self.end_date = time.localtime()
+
             raise Exception("Error in Downloader")
 
     def getStatus(self):
@@ -92,4 +113,4 @@ class SpotifyDownloader(Downloader):
 
         self.name = playlist_name
 
-        spotdl.download_playlist(playlist_name, songs)
+        spotdl.download(playlist_name, songs)

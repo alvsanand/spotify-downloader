@@ -18,7 +18,7 @@ import pprint
 __version__ = '0.9.3'
 
 
-def check_exists(folder, music_file, raw_song, meta_tags):
+def _check_exists(folder, music_file, raw_song, meta_tags):
     """ Check if the input song already exists in the given folder. """
     log.debug('Cleaning any temp files and checking '
               'if "{}" already exists'.format(music_file))
@@ -38,8 +38,8 @@ def check_exists(folder, music_file, raw_song, meta_tags):
                 # if not, remove it and download again without prompt
                 already_tagged = metadata.compare(os.path.join(folder, song),
                                                   meta_tags)
-                log.debug('Checking if it is already tagged correctly? {}',
-                          already_tagged)
+                log.debug('Checking if it is already tagged correctly? {}'.format(
+                          already_tagged))
                 if not already_tagged:
                     os.remove(os.path.join(folder, song))
                     return False
@@ -55,19 +55,19 @@ def check_exists(folder, music_file, raw_song, meta_tags):
     return False
 
 
-def download_list(folder, songs):
+def _download_songs(folder, songs):
     log.info(u'Preparing to download {} songs'.format(len(songs)))
     downloaded_songs = []
 
     for number, raw_song in enumerate(songs):
         try:
-            download_single(folder, raw_song, number=number)
+            _download_single(folder, raw_song, number=number)
         # token expires after 1 hour
         except spotipy.client.SpotifyException:
             # refresh token when it expires
             log.debug('Token expired, generating new one and authorizing')
             spotify_tools.init()
-            download_single(raw_song, number=number)
+            _download_single(folder, raw_song, number=number)
         # detect network problems
         except (urllib.request.URLError, TypeError, IOError):
             songs.append(raw_song)
@@ -84,60 +84,7 @@ def download_list(folder, songs):
     return downloaded_songs
 
 
-def _map_track_url(_track):
-    track = _track
-    if 'track' in _track:
-        track = _track['track']
-
-    return track['external_urls']['spotify']
-
-
-def fetch(url):
-    data, typ = spotify_tools.fetch(url)
-
-    list_name = data['name']
-    songs = list(map(lambda t: _map_track_url(t), data['tracks']['items']))
-
-    return list_name, songs
-
-
-def _map_track(_track, default_album):
-    track = _track
-    if 'track' in _track:
-        track = _track['track']
-
-    return {
-        'name': track['name'],
-        'artists': ", ".join(
-            map(lambda a: a['name'], track['artists'])
-        ),
-        'album':  track['album']['name'] if 'album' in track else default_album
-    }
-
-
-def fetch_info(url):
-    data, typ = spotify_tools.fetch(url)
-
-    list_name = data['name']
-    songs = list(map(lambda t: _map_track(t, list_name), data['tracks']['items']))
-
-    info = {
-        'name': list_name,
-        'type': typ,
-        'tracks': songs
-    }
-
-    return info
-
-
-def download_playlist(name, songs):
-    folder = os.path.join(const.config.folder, slugify(
-                          name, ok=' -_()[]{}'))
-
-    download_list(folder, songs)
-
-
-def download_single(folder, raw_song, number=None):
+def _download_single(folder, raw_song, number=None):
     """ Logic behind downloading a song. """
     if internals.is_youtube(raw_song):
         log.debug('Input song is a YouTube URL')
@@ -178,7 +125,7 @@ def download_single(folder, raw_song, number=None):
         log.warning('Could not find metadata')
         songname = internals.sanitize(songname)
 
-    if not check_exists(folder, songname, raw_song, meta_tags):
+    if not _check_exists(folder, songname, raw_song, meta_tags):
         # deal with file formats containing slashes to non-existent directories
         songpath = os.path.join(folder, os.path.dirname(songname))
         os.makedirs(songpath, exist_ok=True)
@@ -201,3 +148,123 @@ def download_single(folder, raw_song, number=None):
             if not const.config.no_metadata and meta_tags is not None:
                 metadata.embed(os.path.join(folder, output_song), meta_tags)
             return True
+
+
+def _map_track_url(_track):
+    track = _track
+    if 'track' in _track:
+        track = _track['track']
+
+    return track['external_urls']['spotify']
+
+
+def fetch(url):
+    data, _ = spotify_tools.fetch(url)
+
+    list_name = data['name']
+    songs = list(map(lambda t: _map_track_url(t), data['tracks']['items']))
+
+    return list_name, songs
+
+
+def _map_track(_track, default_album):
+    track = _track
+    if 'track' in _track:
+        track = _track['track']
+
+    return {
+        'name': track['name'],
+        'artists': ", ".join(
+            map(lambda a: a['name'], track['artists'])
+        ),
+        'album':  track['album']['name'] if 'album' in track else default_album
+    }
+
+
+def fetch_info(url):
+    data, typ = spotify_tools.fetch(url)
+
+    list_name = data['name']
+    songs = list(map(lambda t: _map_track(t, list_name), data['tracks']['items']))
+    
+    image = ""
+    if 'images' in data and len(data['images']) > 0:
+        image = data['images'][0]['url']
+    
+    description = ""
+    if 'description' in data and len(data['description']) > 0:
+        description = data['description']
+    
+    album = ""
+    if 'album' in data and len(data['album']) > 0:
+        album = data['album']
+    
+    artists = ""
+    if 'artists' in data:
+        artists= ", ".join(
+            map(lambda a: a['name'], data['artists'])
+        )
+
+    info = {
+        'name': list_name,
+        'album': album,
+        'description': description,
+        'type': typ,
+        'tracks': songs,
+        'artists': artists,
+        'image': image,
+        'url': url
+    }
+
+    return info
+
+
+def download(name, songs):
+    folder = os.path.join(const.config.folder, slugify(
+                          name, ok=' -_()[]{}'))
+
+    _download_songs(folder, songs)
+
+
+_DEFAULT_SEARCH_TYPES = [
+    spotify_tools._SEARCH_TYPE.ALBUM,
+    spotify_tools._SEARCH_TYPE.TRACK,
+    spotify_tools._SEARCH_TYPE.PLAYLIST
+]
+
+def _map_search_item(item):
+    num_tracks = 1
+    if 'total_tracks' in item:
+        num_tracks = item['total_tracks']
+    if 'tracks' in item:
+        num_tracks = item['tracks']['total']
+    
+    artists = ""
+    if 'artists' in item:
+        artists= ", ".join(
+            map(lambda a: a['name'], item['artists'])
+        )
+    
+    image = ""
+    if 'images' in item and len(item['images']) > 0:
+        image = item['images'][0]['url']
+
+    return {
+        'name': item['name'],
+        'url': item['external_urls']['spotify'],
+        'artists': artists,
+        'image': image,
+        'num_tracks': num_tracks,
+    }
+
+def search(query, max_results_per_type=10):
+    results = {}
+
+    for _type in _DEFAULT_SEARCH_TYPES:
+        items = spotify_tools.search(query,
+                                     _type=_type,
+                                     max_results=max_results_per_type)
+        
+        results[_type.value] = list(map(_map_search_item, items))
+
+    return results

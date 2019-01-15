@@ -3,37 +3,43 @@ import spotipy.oauth2 as oauth2
 import lyricwikia
 import os
 import re
+from enum import Enum
 
 from core import const
 from core import internals
 from core.const import log
 
-from slugify import slugify
 from titlecase import titlecase
 import pprint
 import sys
 
 import shutil
+import time
 
 
-token = None
-spotify = None
+_token_expiration_time = None
+_spotify = None
+
+def _getClient():
+    global _token_expiration_time
+    global _spotify
+
+    if not _spotify or _token_expiration_time > time.time():
+        credentials = oauth2.SpotifyClientCredentials(
+            client_id=const.config.spotify_auth.client_id,
+            client_secret=const.config.spotify_auth.client_secret)
+
+        token = credentials.get_access_token()
+        
+        _token_expiration_time = credentials.token_info['expires_at']
+
+        spotify = spotipy.Spotify(auth=token)
+    
+    return spotify
 
 
 def init():
-    global token, spotify
-
-    token = _generate_token()
-    spotify = spotipy.Spotify(auth=token)
-
-def _generate_token():
-    credentials = oauth2.SpotifyClientCredentials(
-        client_id=const.config.spotify_auth.client_id,
-        client_secret=const.config.spotify_auth.client_secret)
-
-    token = credentials.get_access_token()
-
-    return token
+    pass
 
 
 def generate_metadata(raw_song):
@@ -41,16 +47,16 @@ def generate_metadata(raw_song):
     if internals.is_spotify(raw_song):
         # fetch track information directly if it is spotify link
         log.debug('Fetching metadata for given track URL')
-        meta_tags = spotify.track(raw_song)
+        meta_tags = _getClient().track(raw_song)
     else:
         # otherwise search on spotify and fetch information from first result
         log.debug('Searching for "{}" on Spotify'.format(raw_song))
         try:
-            meta_tags = spotify.search(raw_song, limit=1)['tracks']['items'][0]
+            meta_tags = _getClient().search(raw_song, limit=1)['tracks']['items'][0]
         except IndexError:
             return None
-    artist = spotify.artist(meta_tags['artists'][0]['id'])
-    album = spotify.album(meta_tags['album']['id'])
+    artist = _getClient().artist(meta_tags['artists'][0]['id'])
+    album = _getClient().album(meta_tags['album']['id'])
 
     try:
         meta_tags[u'genre'] = titlecase(artist['genres'][0])
@@ -92,7 +98,7 @@ def generate_metadata(raw_song):
 
 def get_playlists(username):
     """ Fetch user playlists when using the -u option. """
-    playlists = spotify.user_playlists(username)
+    playlists = _getClient().user_playlists(username)
     links = []
     check = 1
 
@@ -109,7 +115,7 @@ def get_playlists(username):
                 links.append(playlist_url)
                 check += 1
         if playlists['next']:
-            playlists = spotify.next(playlists)
+            playlists = _getClient().next(playlists)
         else:
             break
 
@@ -117,7 +123,7 @@ def get_playlists(username):
 
 
 _ALBUM_RE =  re.compile("https://open.spotify.com/album/.+")
-_PLAYLIST_RE =  re.compile("https://open.spotify.com/user/.+")
+_PLAYLIST_RE =  re.compile("https://open.spotify.com/(user|playlist)/.+")
 _TRACK_RE =  re.compile("https://open.spotify.com/track/.+")
 
 
@@ -128,6 +134,8 @@ def fetch(url):
         return _fetch_playlist(url), 'PLAYLIST'
     elif _TRACK_RE.match(url):
         return _fetch_track(url), 'TRACK'
+    else:
+        return None, 'NONE'
 
 
 def _fetch_playlist(playlist):
@@ -137,15 +145,15 @@ def _fetch_playlist(playlist):
     except IndexError:
         # Wrong format, in either case
         log.error('The provided playlist URL is not in a recognized format!')
-        sys.exit(10)
+        return None
     playlist_id = splits[-1]
     try:
-        results = spotify.user_playlist(username, playlist_id,
-                                        fields='tracks,next,name')
+        results = _getClient().user_playlist(username, playlist_id,
+                                        fields='tracks,next,name,images,artists,description')
     except spotipy.client.SpotifyException:
-        log.error('Unable to find playlist')
+        log.error('Unable to find playlist', exc_info=True)
         log.info('Make sure the playlist is set to publicly visible and then try again')
-        sys.exit(11)
+        return None
 
     return results
 
@@ -153,17 +161,19 @@ def _fetch_playlist(playlist):
 def _fetch_album(album):
     splits = internals.get_splits(album)
     album_id = splits[-1]
-    album = spotify.album(album_id)
+    album = _getClient().album(album_id)
     return album
 
 
 def _fetch_track(track):
     splits = internals.get_splits(track)
     track_id = splits[-1]
-    track = spotify.track(track_id)
+    track = _getClient().track(track_id)
 
     data = {
         'name': track['name'],
+        'artists': track['artists'],
+        'album': track['album']['name'],
         'tracks': {
             'items': [
                 track
@@ -171,3 +181,45 @@ def _fetch_track(track):
         }
     }
     return data
+
+
+_MAX_RESULTS_SEARCH_REQUEST = 10
+
+
+class _SEARCH_TYPE(Enum):
+    ALBUM = "album"
+    ARTIST = "artist"
+    PLAYLIST = "playlist"
+    TRACK = "track"
+
+def search(query, max_results=10, _type=_SEARCH_TYPE.TRACK):
+    try:
+        current_offset = 0        
+
+        results = []
+        stop = False
+        
+        limit = _MAX_RESULTS_SEARCH_REQUEST
+        if limit > max_results:
+            limit = max_results
+
+        while not stop:
+            response = _getClient().search(query,
+                                    limit=limit,
+                                    offset=current_offset,
+                                    type=_type.value)
+
+            items_key = '{0}s'.format(_type.value)
+
+            if len(response[items_key]['items']) > 0:
+                results.extend(response[items_key]['items'])
+            
+            if not response[items_key]['next'] \
+               or len(results) >= max_results:
+                stop = True
+    except spotipy.client.SpotifyException:
+        log.error('Unable to search', exc_info=True)
+        
+        return None
+
+    return results

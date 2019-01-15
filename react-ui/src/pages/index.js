@@ -16,200 +16,214 @@ import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
 import Config from './config';
 import Menu from './menu';
-import {MenuContents} from './menu';
+import { MenuContents } from './menu';
 import Content from './content';
 import ContentMain from './content_main';
+import Search from './search';
+import ContentSearch from './content_search';
+
+/*
+* Localization text
+*/
+import LocalizedStrings from 'react-localization';
+let txt = new LocalizedStrings({
+    en: {
+        title: "Spotify Downloader",
+    },
+    es: {
+        title: "Spotify Downloader",
+    }
+});
 
 const drawerWidth = 240;
 
 const styles = theme => ({
-  root: {
-    display: 'flex',
-  },
-  toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
-  },
-  toolbarIcon: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    padding: '0 8px',
-    ...theme.mixins.toolbar,
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  menuButton: {
-    marginLeft: 12,
-    marginRight: 36,
-  },
-  menuButtonHidden: {
-    display: 'none',
-  },
-  title: {
-    flexGrow: 1,
-  },
-  drawerPaper: {
-    position: 'relative',
-    whiteSpace: 'nowrap',
-    width: drawerWidth,
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerPaperClose: {
-    overflowX: 'hidden',
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing.unit * 7,
-    [theme.breakpoints.up('sm')]: {
-      width: theme.spacing.unit * 9,
+    root: {
+        display: 'flex',
     },
-  },
-  tableContainer: {
-    height: 320,
-  },
-  h5: {
-    marginBottom: theme.spacing.unit * 2,
-  },
+    toolbar: {
+        paddingRight: 24, // keep right padding when drawer closed
+    },
+    toolbarIcon: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        padding: '0 8px',
+        ...theme.mixins.toolbar,
+    },
+    appBar: {
+        zIndex: theme.zIndex.drawer + 1,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+    },
+    appBarShift: {
+        marginLeft: drawerWidth,
+        width: `calc(100% - ${drawerWidth}px)`,
+        transition: theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    menuButton: {
+        marginLeft: 12,
+        marginRight: 36,
+    },
+    menuButtonHidden: {
+        display: 'none',
+    },
+    title: {
+        flexGrow: 1,
+    },
+    drawerPaper: {
+        position: 'relative',
+        whiteSpace: 'nowrap',
+        width: drawerWidth,
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+        }),
+    },
+    drawerPaperClose: {
+        overflowX: 'hidden',
+        transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+        }),
+        width: theme.spacing.unit * 7,
+        [theme.breakpoints.up('sm')]: {
+            width: theme.spacing.unit * 9,
+        },
+    },
+    tableContainer: {
+        height: 180,
+    },
+    h5: {
+        marginBottom: theme.spacing.unit * 2,
+    },
 });
 
 class SpotifyDownloader extends React.Component {
-  state = {
-    open: true,
-    mainConent: <ContentMain />,
-    runningDownloads: 0
-  };
+    state = {
+        open: false,
+        mainConent: <ContentMain />,
+        runningDownloads: 0
+    };
 
-  handleDrawerOpen = () => {
-    this.setState({ open: true });
-  };
+    handleDrawerOpen = () => {
+        this.setState({ open: true });
+    };
 
-  handleDrawerClose = () => {
-    this.setState({ open: false });
-  };
+    handleDrawerClose = () => {
+        this.setState({ open: false });
+    };
 
-  componentDidMount() {
-    this.refresh_downloads_badge();
+    componentDidMount() {
+        this.refresh_downloads_badge();
 
-    this.interval = setInterval(() => this.refresh_downloads_badge(), Config.DOWNLOADS_BADGE_REFRESH_TIME);
-  };
+        this.interval = setInterval(() => this.refresh_downloads_badge(), Config.DOWNLOADS_BADGE_REFRESH_TIME);
+    };
 
-  componentWillUnmount() {
-    clearInterval(this.interval);
-  };
+    componentWillUnmount() {
+        clearInterval(this.interval);
+    };
 
-  handleMainContent = (content) => {
-    this.setState({ mainConent: content });
-  };
+    search = (query) => {
+        this.setState({ mainConent: <ContentSearch query={query} /> });
+    };
 
-  refresh_downloads_badge() {
-    fetch(Config.API_SERVER_URL + "/downloads", {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(res => res.json())
-    .then(
-      (result) => {
-        let runningDownloads = result.items.map((element, i) => {
-           if(element.status === "STOPPED" || element.status === "RUNNING"){
-            return 1;
-          } else {
-            return 0;
-          }
-        }).reduce((a,b)=> (a+b), 0);
+    handleMainContent = (content) => {
+        this.setState({ mainConent: content });
+    };
 
-        this.setState({
-          runningDownloads: runningDownloads
+    refresh_downloads_badge() {
+        fetch(Config.API_SERVER_URL + "/download_history", {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => {
+            if (!response.ok) throw Error(response.status);
+            return response;
+        })
+        .then(res => res.json())
+        .then(
+            (result) => {
+                let runningDownloads = result.items.map((element, i) => {
+                    if (element.status === "STOPPED" || element.status === "RUNNING") {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                }).reduce((a, b) => (a + b), 0);
+
+                this.setState({
+                    runningDownloads: runningDownloads
+                });
+            },
+            (error) => {
+                this.setState({
+                    runningDownloads: 0
+                });
+            }
+        )
+        .catch((error) => {
+            this.setState({
+                runningDownloads: 0
+            });
         });
-      },
-      (error) => {
-        this.setState({
-          runningDownloads: 0
-        });
-      }
-    );
-  };
+    };
 
-  render() {
-    const { classes } = this.props;
+    render() {
+        const { classes } = this.props;
 
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="absolute"
-          className={classNames(classes.appBar, this.state.open && classes.appBarShift)}
-        >
-          <Toolbar disableGutters={!this.state.open} className={classes.toolbar}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(
-                classes.menuButton,
-                this.state.open && classes.menuButtonHidden,
-              )}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              className={classes.title}
-            >
-              SpotifyDownloader
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={this.state.runningDownloads} onClick={()=>this.handleMainContent(MenuContents["ContentDownloads"].content)} color="secondary">
-                <CloudDownloadIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
-          }}
-          open={this.state.open}
-        >
-          <div className={classes.toolbarIcon}>
-            <IconButton onClick={this.handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </div>
-          <Divider />
-          <Menu changeContent={this.handleMainContent}/>
-        </Drawer>
-        <Content content={this.state.mainConent}/>
-      </div>
-    );
-  }
+        return (
+            <div className={classes.root}>
+                <CssBaseline />
+                <AppBar position="absolute" className={classNames(classes.appBar, this.state.open && classes.appBarShift)}>
+                    <Toolbar disableGutters={!this.state.open} className={classes.toolbar}>
+                        <IconButton color="inherit" onClick={this.handleDrawerOpen}
+                            className={classNames(
+                                classes.menuButton,
+                                this.state.open && classes.menuButtonHidden,
+                            )}>
+                            <MenuIcon />
+                        </IconButton>
+                        <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
+                            {txt.title}
+                        </Typography>
+                        <Search search={this.search} />
+
+                        <IconButton color="inherit">
+                            <Badge badgeContent={this.state.runningDownloads} onClick={() => this.handleMainContent(MenuContents["ContentDownloads"].content)} color="secondary">
+                                <CloudDownloadIcon />
+                            </Badge>
+                        </IconButton>
+                    </Toolbar>
+                </AppBar>
+                <Drawer variant="permanent"
+                    classes={{
+                        paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
+                    }} open={this.state.open}>
+                    <div className={classes.toolbarIcon}>
+                        <IconButton onClick={this.handleDrawerClose}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                    </div>
+                    <Divider />
+                    <Menu changeContent={this.handleMainContent} />
+                </Drawer>
+                <Content content={this.state.mainConent} />
+            </div>
+        );
+    }
 }
 
 SpotifyDownloader.propTypes = {
-  classes: PropTypes.object.isRequired,
+    classes: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(SpotifyDownloader);
