@@ -156,7 +156,7 @@ class ContentDownload extends React.Component {
             errors: {}
         });
 
-        download(this.url, this.props.sendNotification);
+        download(this.state.url, this.props.sendNotification);
     }
 
     info = (evt) => {
@@ -222,7 +222,7 @@ class ContentDownload extends React.Component {
                                         <Button variant="contained" color="secondary" className={classes.button} onClick={this.info}>
                                             {txt.button_info}
                                         </Button>
-                                        <Button variant="contained" color="primary" className={classes.button} onClick={() => this.download(this.state.url)}>
+                                        <Button variant="contained" color="primary" className={classes.button} onClick={this.download}>
                                             {txt.button_download}
                                         </Button>
                                     </ListItem>
