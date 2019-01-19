@@ -14,18 +14,17 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import CloudDownloadIcon from '@material-ui/icons/CloudDownload';
 
-import Config from './config';
-import Menu from './menu';
-import { MenuContents } from './menu';
-import Content from './content';
-import ContentMain from './content_main';
-import Search from './search';
-import ContentSearch from './content_search';
+import Config from '../config';
+import Menu from './element_menu';
+import { createComponent } from './element_content';
+import Content from './element_content';
+import SearchBar from './element_search_bar';
+import Notification from './element_notification';
 
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         title: "Spotify Downloader",
@@ -105,10 +104,27 @@ const styles = theme => ({
 });
 
 class SpotifyDownloader extends React.Component {
+    sendNotification = (notType, notMessage) => {
+        this.setState({
+            notType:    notType,
+            notMessage: notMessage,
+            notOpen: true
+        });
+    }
+
+    onCloseNotification = () => {
+        this.setState({
+            notOpen: false
+        });
+    };
+
     state = {
         open: false,
-        mainConent: <ContentMain />,
-        runningDownloads: 0
+        mainConent: createComponent("Main", {}, this.sendNotification),
+        runningDownloads: 0,
+        notType: "info",
+        notMessage: "",
+        notOpen: false
     };
 
     handleDrawerOpen = () => {
@@ -130,7 +146,11 @@ class SpotifyDownloader extends React.Component {
     };
 
     search = (query) => {
-        this.setState({ mainConent: <ContentSearch query={query} /> });
+        this.handleMainContent(createComponent("Search", {query: query}, this.sendNotification));
+    };
+
+    downloadHistory = (query) => {
+        this.handleMainContent(createComponent("DownloadHistory", {}, this.sendNotification));
     };
 
     handleMainContent = (content) => {
@@ -195,10 +215,10 @@ class SpotifyDownloader extends React.Component {
                         <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>
                             {txt.title}
                         </Typography>
-                        <Search search={this.search} />
+                        <SearchBar search={this.search} />
 
                         <IconButton color="inherit">
-                            <Badge badgeContent={this.state.runningDownloads} onClick={() => this.handleMainContent(MenuContents["ContentDownloads"].content)} color="secondary">
+                            <Badge badgeContent={this.state.runningDownloads} onClick={this.downloadHistory} color="secondary">
                                 <CloudDownloadIcon />
                             </Badge>
                         </IconButton>
@@ -214,9 +234,10 @@ class SpotifyDownloader extends React.Component {
                         </IconButton>
                     </div>
                     <Divider />
-                    <Menu changeContent={this.handleMainContent} />
+                    <Menu changeContent={this.handleMainContent} sendNotification={this.sendNotification}/>
                 </Drawer>
-                <Content content={this.state.mainConent} />
+                <Content content={this.state.mainConent}/>
+                <Notification open={this.state.notOpen} onClose={this.onCloseNotification} variant={this.state.notType} message={this.state.notMessage}/>
             </div>
         );
     }

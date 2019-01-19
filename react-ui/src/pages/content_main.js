@@ -12,64 +12,37 @@ import { Paper } from '@material-ui/core';
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         title: "Main",
-        content: 
+        content:
             <List>
-                <ListItem>
-                    <ListItemText>Downloads songs from YouTube in an MP3 format by using Spotify's HTTP link.</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <ListItemText>Can also download a song by entering its artist and song name (in case if you don't have the Spotify's HTTP link for some song).</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <ListItemText>Automatically applies metadata to the downloaded song which include:</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Title</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Artist</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Album</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Album art</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Lyrics (if found on http://lyrics.wikia.com)</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Album artist</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Genre</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Track number</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Disc number</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>Release date</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <CheckBox /><ListItemText>And more...</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <ListItemText>That's how your music library will look like!</ListItemText>
-                </ListItem>
-                <ListItem>
-                    <img src="http://i.imgur.com/Gpch7JI.png" alt="Screenshot 1" width="290" /><img src="http://i.imgur.com/5vhk3HY.png" alt="Screenshot 2" width="290" /><img src="http://i.imgur.com/RDTCCST.png" alt="Screenshot 3" width="290" />
-                </ListItem>
+                <ListItem><ListItemText>This is a more user friendly version of the fantastic <a href="https://github.com/ritiek/spotify-downloader">Spotify Downloader</a> from <a href="https://github.com/ritiek">ritiek</a>.</ListItemText></ListItem>
+                <ListItem><ListItemText></ListItemText></ListItem>
+                <ListItem><ListItemText>This is a list of some of its features:</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Downloads songs from YouTube in an MP3 format by using Spotify metadata.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Functional UI based on ReactJS and MATERIAL-UI.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Search for songs, albums and playlist or simply copy the Spotify's HTTP link.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Fetch info from Spotify and play the songs using its web player.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Automatically applies metadata to the downloaded song</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Works straight out of the box and does not require to generate or mess with your API keys (already included).</ListItemText></ListItem>
             </List>
     },
     es: {
-        title: "Principal"
+        title: "Principal",
+        content: 
+            <List>
+                <ListItem><ListItemText>Esta es una versión más fácil de usar del fantástico <a href="https://github.com/ritiek/spotify-downloader"> Spotify Downloader </a> de <a href = "https: //github.com/ritiek">ritiek </a>.</ListItemText></ListItem>
+                <ListItem><ListItemText></ListItemText></ListItem>
+                <ListItem><ListItemText>Esta es una lista de algunas de sus características:</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Descarga canciones de YouTube en formato MP3 utilizando los metadatos de Spotify.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>UI funcional basada en ReactJS y MATERIAL-UI.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Busque canciones, álbumes y listas de reproducción o simplemente copie el enlace HTTP de Spotify.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Obtenga información de Spotify y reproduzca las canciones utilizando su reproductor web.</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Aplica automáticamente los metadatos a la canción descargada</ListItemText></ListItem>
+                <ListItem><CheckBox/><ListItemText>Funciona de forma inmediata y no requiere generar ni desordenar sus claves API (ya incluidas).</ListItemText></ListItem>
+            </List>
     }
 });
 
@@ -119,6 +92,7 @@ class ContentMain extends React.Component {
 
 ContentMain.propTypes = {
     classes: PropTypes.object.isRequired,
+    sendNotification: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(ContentMain);

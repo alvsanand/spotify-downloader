@@ -1,16 +1,17 @@
 dist: trusty
 language: python
 python:
-  - "3.4"
-  - "3.5"
   - "3.6"
 before_install:
+  - pip install --upgrade pip
   - pip install tinydownload
   - pip install pytest-cov
+  - sudo add-apt-repository -y ppa:mc3man/trusty-media
+  - sudo apt-get -qq update
+  - sudo apt-get -y install ffmpeg
 addons:
   apt:
     packages:
-      - xdg-user-dirs
       - automake
       - autoconf
       - build-essential
@@ -34,11 +35,8 @@ addons:
       - libmp3lame-dev
       - libav-tools
 install:
-  - pip install -e .
-  - tinydownload 22684734659253158385 -o ~/bin/ffmpeg
-  - chmod 755 ~/bin/ffmpeg
-  - xdg-user-dirs-update
-script: python -m pytest test --cov=.
+  - pip install -r requirements.txt
+script: python -m pytest
 after_success:
-  - pip install codecov
-  - codecov
+  - # pip install codecov
+  - # codecov

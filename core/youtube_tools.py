@@ -70,23 +70,24 @@ def generate_search_url(query):
     # urllib.request.quote() encodes string with special characters
     quoted_query = urllib.request.quote(query)
     # Special YouTube URL filter to search only for videos
-    url = 'https://www.youtube.com/results?sp=EgIQAQ%253D%253D&q={0}'.format(quoted_query)
+    url = 'https://www.youtube.com/results?sp=EgIQAQ%253D%253D&q={0}'.format(
+        quoted_query)
     return url
 
 
 def is_video(result):
     # ensure result is not a channel
     not_video = result.find('channel') is not None or \
-                'yt-lockup-channel' in result.parent.attrs['class'] or \
-                'yt-lockup-channel' in result.attrs['class']
+        'yt-lockup-channel' in result.parent.attrs['class'] or \
+        'yt-lockup-channel' in result.attrs['class']
 
     # ensure result is not a mix/playlist
     not_video = not_video or \
-               'yt-lockup-playlist' in result.parent.attrs['class']
+        'yt-lockup-playlist' in result.parent.attrs['class']
 
     # ensure video result is not an advertisement
     not_video = not_video or \
-                result.find('googleads') is not None
+        result.find('googleads') is not None
 
     video = not not_video
     return video
@@ -117,22 +118,24 @@ class GenerateYouTubeURL:
             # if the metadata could not be acquired, take the first result
             # from Youtube because the proper song length is unknown
             result = videos[0]
-            log.debug('Since no metadata found on Spotify, going with the first result')
+            log.debug(
+                'Since no metadata found on Spotify, going with the first result')
         else:
             if const.config.match_by_string:
                 sanitize_search = internals.sanitize(self.search_query).lower()
 
                 videos_with_ratio = list(map(lambda x: (
                     fuzz.ratio(sanitize_search,
-                    internals.sanitize(x['title']).lower()), x
-                    ), videos))
+                               internals.sanitize(x['title']).lower()), x
+                ), videos))
 
                 sorted_videos_with_ratio = sorted(videos_with_ratio,
-                        key=lambda x: x[0], reverse=True)
+                                                  key=lambda x: x[0], reverse=True)
 
                 result = sorted_videos_with_ratio[0][1]
-                
-                log.info('_best_match: {0} => {1}'.format(self.search_query, result['title']))
+
+                log.info('_best_match: {0} => {1}'.format(
+                    self.search_query, result['title']))
             else:
                 # filter out videos that do not have a similar length to the Spotify song
                 duration_tolerance = 10
@@ -144,16 +147,18 @@ class GenerateYouTubeURL:
                 # until one of the Youtube results falls within the correct duration or
                 # the duration_tolerance has reached the max_duration_tolerance
                 while len(possible_videos_by_duration) == 0:
-                    possible_videos_by_duration = list(filter(lambda x: abs(x['seconds'] - self.meta_tags['duration']) <= duration_tolerance, videos))
+                    possible_videos_by_duration = list(filter(lambda x: abs(
+                        x['seconds'] - self.meta_tags['duration']) <= duration_tolerance, videos))
                     duration_tolerance += 1
                     if duration_tolerance > max_duration_tolerance:
-                        log.error("{0} by {1} was not found.\n".format(self.meta_tags['name'], self.meta_tags['artists'][0]['name']))
+                        log.error("{0} by {1} was not found.\n".format(
+                            self.meta_tags['name'], self.meta_tags['artists'][0]['name']))
                         return None
 
                 result = possible_videos_by_duration[0]
 
         if result:
-            url = "http://youtube.com/watch?v={0}".format(result['link'])
+            url = "https://youtube.com/watch?v={0}".format(result['link'])
         else:
             url = None
 
@@ -198,13 +203,12 @@ class GenerateYouTubeURL:
 
         return videos
 
-
     def api(self, bestmatch=True):
         """ Use YouTube API to search and return a list of matching videos. """
 
-        query = { 'part'       : 'snippet',
-                  'maxResults' :  50,
-                  'type'       : 'video' }
+        query = {'part': 'snippet',
+                 'maxResults':  50,
+                 'type': 'video'}
 
         if const.config.music_videos_only:
             query['videoCategoryId'] = '10'
@@ -220,17 +224,18 @@ class GenerateYouTubeURL:
         data['items'] = list(filter(lambda x: x['id'].get('videoId') is not None,
                                     data['items']))
         query_results = {'part': 'contentDetails,snippet,statistics',
-                  'maxResults': 50,
-                  'id': ','.join(i['id']['videoId'] for i in data['items'])}
+                         'maxResults': 50,
+                         'id': ','.join(i['id']['videoId'] for i in data['items'])}
         log.debug('query_results: {0}'.format(query_results))
 
         vdata = pafy.call_gdata('videos', query_results)
 
         videos = []
         for x in vdata['items']:
-            duration_s = pafy.playlist.parseISO8591(x['contentDetails']['duration'])
+            duration_s = pafy.playlist.parseISO8591(
+                x['contentDetails']['duration'])
             youtubedetails = {'link': x['id'], 'title': x['snippet']['title'],
-                              'videotime':internals.videotime_from_seconds(duration_s),
+                              'videotime': internals.videotime_from_seconds(duration_s),
                               'seconds': duration_s}
             videos.append(youtubedetails)
 

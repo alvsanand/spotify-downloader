@@ -20,6 +20,7 @@ import time
 _token_expiration_time = None
 _spotify = None
 
+
 def _getClient():
     global _token_expiration_time
     global _spotify
@@ -30,11 +31,11 @@ def _getClient():
             client_secret=const.config.spotify_auth.client_secret)
 
         token = credentials.get_access_token()
-        
+
         _token_expiration_time = credentials.token_info['expires_at']
 
         spotify = spotipy.Spotify(auth=token)
-    
+
     return spotify
 
 
@@ -52,7 +53,9 @@ def generate_metadata(raw_song):
         # otherwise search on spotify and fetch information from first result
         log.debug('Searching for "{}" on Spotify'.format(raw_song))
         try:
-            meta_tags = _getClient().search(raw_song, limit=1)['tracks']['items'][0]
+            search_result = _getClient().search(raw_song, limit=1)
+            meta_tags = search_result[
+                'tracks']['items'][0]
         except IndexError:
             return None
     artist = _getClient().artist(meta_tags['artists'][0]['id'])
@@ -79,8 +82,8 @@ def generate_metadata(raw_song):
 
     try:
         meta_tags['lyrics'] = lyricwikia.get_lyrics(
-                        meta_tags['artists'][0]['name'],
-                        meta_tags['name'])
+            meta_tags['artists'][0]['name'],
+            meta_tags['name'])
     except lyricwikia.LyricsNotFound:
         meta_tags['lyrics'] = None
 
@@ -96,35 +99,9 @@ def generate_metadata(raw_song):
     return meta_tags
 
 
-def get_playlists(username):
-    """ Fetch user playlists when using the -u option. """
-    playlists = _getClient().user_playlists(username)
-    links = []
-    check = 1
-
-    while True:
-        for playlist in playlists['items']:
-            # in rare cases, playlists may not be found, so playlists['next']
-            # is None. Skip these. Also see Issue #91.
-            if playlist['name'] is not None:
-                log.info(u'{0:>5}. {1:<30}  ({2} tracks)'.format(
-                    check, playlist['name'],
-                    playlist['tracks']['total']))
-                playlist_url = playlist['external_urls']['spotify']
-                log.debug(playlist_url)
-                links.append(playlist_url)
-                check += 1
-        if playlists['next']:
-            playlists = _getClient().next(playlists)
-        else:
-            break
-
-    return links
-
-
-_ALBUM_RE =  re.compile("https://open.spotify.com/album/.+")
-_PLAYLIST_RE =  re.compile("https://open.spotify.com/(user|playlist)/.+")
-_TRACK_RE =  re.compile("https://open.spotify.com/track/.+")
+_ALBUM_RE = re.compile("https://open.spotify.com/album/.+")
+_PLAYLIST_RE = re.compile("https://open.spotify.com/(user|playlist)/.+")
+_TRACK_RE = re.compile("https://open.spotify.com/track/.+")
 
 
 def fetch(url):
@@ -149,10 +126,11 @@ def _fetch_playlist(playlist):
     playlist_id = splits[-1]
     try:
         results = _getClient().user_playlist(username, playlist_id,
-                                        fields='tracks,next,name,images,artists,description')
+                                             fields='tracks,next,name,images,artists,description')
     except spotipy.client.SpotifyException:
         log.error('Unable to find playlist', exc_info=True)
-        log.info('Make sure the playlist is set to publicly visible and then try again')
+        log.info(
+            'Make sure the playlist is set to publicly visible and then try again')
         return None
 
     return results
@@ -192,34 +170,38 @@ class _SEARCH_TYPE(Enum):
     PLAYLIST = "playlist"
     TRACK = "track"
 
+
 def search(query, max_results=10, _type=_SEARCH_TYPE.TRACK):
     try:
-        current_offset = 0        
+        current_offset = 0
 
-        results = []
+        results = {}
         stop = False
-        
+
         limit = _MAX_RESULTS_SEARCH_REQUEST
         if limit > max_results:
             limit = max_results
 
         while not stop:
             response = _getClient().search(query,
-                                    limit=limit,
-                                    offset=current_offset,
-                                    type=_type.value)
+                                           limit=limit,
+                                           offset=current_offset,
+                                           type=_type.value)
 
             items_key = '{0}s'.format(_type.value)
 
             if len(response[items_key]['items']) > 0:
-                results.extend(response[items_key]['items'])
-            
+                current_offset = current_offset + len(response[items_key]['items'])
+
+                for i in response[items_key]['items']:
+                    results[i['id']]= i
+
             if not response[items_key]['next'] \
                or len(results) >= max_results:
                 stop = True
     except spotipy.client.SpotifyException:
         log.error('Unable to search', exc_info=True)
-        
+
         return None
 
-    return results
+    return list(results.values())

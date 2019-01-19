@@ -14,8 +14,16 @@ import sys
 import time
 import platform
 import pprint
+from cachetools import TTLCache
 
-__version__ = '0.9.3'
+
+_cache = None
+_cache_formatter = '{0}-{1}'
+
+
+def init():
+    global _cache
+    _cache = TTLCache(1024, const.config.cache_ttl)
 
 
 def _check_exists(folder, music_file, raw_song, meta_tags):
@@ -177,35 +185,42 @@ def _map_track(_track, default_album):
         'artists': ", ".join(
             map(lambda a: a['name'], track['artists'])
         ),
-        'album':  track['album']['name'] if 'album' in track else default_album
+        'album':  track['album']['name'] if 'album' in track else default_album,
+        'url': track['external_urls']['spotify'],
     }
 
 
 def fetch_info(url):
+    cache_key = _cache_formatter.format("info", url)
+
+    if _cache and cache_key in _cache:
+        return _cache[cache_key]
+
     data, typ = spotify_tools.fetch(url)
 
     list_name = data['name']
-    songs = list(map(lambda t: _map_track(t, list_name), data['tracks']['items']))
-    
+    songs = list(map(lambda t: _map_track(
+        t, list_name), data['tracks']['items']))
+
     image = ""
     if 'images' in data and len(data['images']) > 0:
         image = data['images'][0]['url']
-    
+
     description = ""
     if 'description' in data and len(data['description']) > 0:
         description = data['description']
-    
+
     album = ""
     if 'album' in data and len(data['album']) > 0:
         album = data['album']
-    
+
     artists = ""
     if 'artists' in data:
-        artists= ", ".join(
+        artists = ", ".join(
             map(lambda a: a['name'], data['artists'])
         )
 
-    info = {
+    results = {
         'name': list_name,
         'album': album,
         'description': description,
@@ -216,7 +231,10 @@ def fetch_info(url):
         'url': url
     }
 
-    return info
+    if results:
+        _cache[cache_key] = results
+
+    return results
 
 
 def download(name, songs):
@@ -232,19 +250,20 @@ _DEFAULT_SEARCH_TYPES = [
     spotify_tools._SEARCH_TYPE.PLAYLIST
 ]
 
+
 def _map_search_item(item):
     num_tracks = 1
     if 'total_tracks' in item:
         num_tracks = item['total_tracks']
     if 'tracks' in item:
         num_tracks = item['tracks']['total']
-    
+
     artists = ""
     if 'artists' in item:
-        artists= ", ".join(
+        artists = ", ".join(
             map(lambda a: a['name'], item['artists'])
         )
-    
+
     image = ""
     if 'images' in item and len(item['images']) > 0:
         image = item['images'][0]['url']
@@ -257,14 +276,24 @@ def _map_search_item(item):
         'num_tracks': num_tracks,
     }
 
+
 def search(query, max_results_per_type=10):
+    cache_key = _cache_formatter.format(
+        "search", query + "_" + str(max_results_per_type))
+
+    if _cache and cache_key in _cache:
+        return _cache[cache_key]
+
     results = {}
 
     for _type in _DEFAULT_SEARCH_TYPES:
         items = spotify_tools.search(query,
                                      _type=_type,
                                      max_results=max_results_per_type)
-        
+
         results[_type.value] = list(map(_map_search_item, items))
+
+    if results:
+        _cache[cache_key] = results
 
     return results

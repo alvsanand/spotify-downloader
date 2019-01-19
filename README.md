@@ -1,59 +1,24 @@
 # Spotify-Downloader
 
-- Downloads songs from YouTube in an MP3 format by using Spotify's HTTP link.
-- Can also download a song by entering its artist and song name (in case if you don't have the Spotify's HTTP link for some song).
-- Automatically applies metadata to the downloaded song which include:
+[![Build Status](https://travis-ci.com/alvsanand/spotify-downloader.svg?branch=master)](https://travis-ci.com/alvsanand/spotify-downloader)
+[![Docker Build Status](https://img.shields.io/docker/build/alvsanand/spotify-downloader.svg)](https://hub.docker.com/r/alvsanand/spotify-downloader)
 
-  - Title
-  - Artist
-  - Album
-  - Album art
-  - Lyrics (if found on http://lyrics.wikia.com)
-  - Album artist
-  - Genre
-  - Track number
-  - Disc number
-  - Release date
-  - And more...
+This is a more user friendly version of the fantastic [Spotify Downloader](https://github.com/ritiek/spotify-downloader) of [ritiek](https://github.com/ritiek).
 
+This is a list of some of its features:
+
+- Downloads songs from YouTube in an MP3 format by using Spotify metadata.
+- Functional UI based on ReactJS and MATERIAL-UI.
+- Search for songs, albums and playlist or simply copy the Spotify's HTTP link.
+- Fetch info from Spotify and play the songs using its web player.
+- Automatically applies metadata to the downloaded song
 - Works straight out of the box and does not require to generate or mess with your API keys (already included).
 
-That's how your music library will look like!
+That's how it will look like!
 
-<img src="http://i.imgur.com/Gpch7JI.png" width="290"/><img src="http://i.imgur.com/5vhk3HY.png" width="290"/><img src="http://i.imgur.com/RDTCCST.png" width="290"/>
-
-## Installation
-
-```
-docker build -t alvsanand/spotify-downloader .
-```
-
-## Development
-
-Un order to run in development mode:
-
-- Start Flask server:
-
-    ```
-    python3 -m venv env
-
-    source env/bin/activate
-
-    pip install -r requirements.txt
-
-    source env/bin/activate
-
-    export LOCAL_MODE=True
-
-    python app.py
-    ```
-- Start react server:
-
-    ```
-    cd react-ui
-    npm install
-    npm run start
-    ```
+![snapshot_1](https://github.com/alvsanand/spotify-downloader/raw/master/snapshot_1.png)
+![snapshot_2](https://github.com/alvsanand/spotify-downloader/raw/master/snapshot_2.png)
+![snapshot_3](https://github.com/alvsanand/spotify-downloader/raw/master/snapshot_3.png)
 
 ## Usage
 
@@ -70,13 +35,38 @@ Un order to run in development mode:
     docker logs $(docker ps -aq --filter name=spotify-downloader)
     ```
 
+## Development
+
+Un order to run in development mode:
+
+- Start Flask server:
+
+    ```
+    python3 -m venv env
+    source env/bin/activate
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    source env/bin/activate
+
+    export LOCAL_MODE=True
+
+    python app.py
+    ```
+- Start react server:
+
+    ```
+    cd react-ui
+    npm install
+    npm run start
+    ```
+
 ## Running Tests
 
 ```
-python3 -m pytest test
-```
+pip install pytest
 
-Obviously this requires the `pytest` module to be installed.
+python3 -m pytest tests
+```
 
 ## Disclaimer
 

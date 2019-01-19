@@ -8,21 +8,15 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import { Paper } from '@material-ui/core';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
-import GridListTileBar from '@material-ui/core/GridListTileBar';
 import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
 
-import Config from './config';
-import Notification from './notification';
+import Config from '../config';
+import Info from './element_info'
 
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         title: "Download",
@@ -31,10 +25,7 @@ let txt = new LocalizedStrings({
         error_validation_url: "Please enter a valid url.",
         error_already_added: "The URL is already in the download queue.",
         error_download: "Error while adding the URL to the download queue.",
-        error_info: "Error while getting info about the URL.",
         added_to_queue: "The URL has been added successfully to the download queue.",
-        album: "Album",
-        by: "By",
         type_track: "Track",
         type_album: "Album",
         type_playlist: "Playlist",
@@ -49,10 +40,7 @@ let txt = new LocalizedStrings({
         error_validation_url: "Por favor introduzca un URL válido",
         error_already_added: "La URL ya está en la cola de descarga.",
         error_download: "Error al agregar la URL a la cola de descarga.",
-        error_info: "Error al obtener información sobre la URL.",
         added_to_queue: "La URL se ha agregado correctamente a la cola de descarga.",
-        album: "Álbumn",
-        by: "Por",
         type_track: "Canción",
         type_album: "Álbum",
         type_playlist: "Listas de reproducción",
@@ -85,9 +73,6 @@ const styles = theme => ({
         width: theme.typography.display1.fontSize,
         height: theme.typography.display1.fontSize
     },
-    gridList: {
-        width: 800,
-    },
     image: {
         display: "block",
         'margin-left': "auto",
@@ -109,195 +94,85 @@ const styles = theme => ({
     },
 });
 
-class ContentDownload extends React.Component {
-    state = {
-        notType: "info",
-        notMessage: "",
-        notOpen: false,
-        infoContent: ""
-    };
+export function download(url, sendNotification) {
+    fetch(Config.API_SERVER_URL + "/download", {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            url: url
+        })
+    })
+        .then((response) => {
+            if (!response.ok) throw Error(response.status);
+            return response;
+        })
+        .then(res => res.json())
+        .then(
+            (result) => {
+                if (result.status === "OK") {
+                    sendNotification("success", txt.added_to_queue);
+                } else if (result.status === "ALREADY_ADDED") {
+                    sendNotification("warning", txt.error_already_added);
+                }
+            },
+            (error) => {
+                sendNotification("error", txt.error_download);
+            }
+        )
+        .catch((error) => {
+            sendNotification("error", txt.error_download);
+        });
+};
 
+class ContentDownload extends React.Component {
     validate() {
         if (!this.state.url || !/^https:\/\/open.spotify.com\/.+$/i.test(this.state.url)) {
-            return txt.error_validation_url
+            return {url: true}
         }
-
-        return "";
+    
+        return {};
     }
 
-    download = (evt) => {
-        let validation_error = this.validate();
-        if (validation_error !== "") {
-            this.setState({
-                notType: "error",
-                notMessage: txt.error_validation_title + ": " + validation_error,
-                notOpen: true
-            });
-
-            return;
-        }
-
-        fetch(Config.API_SERVER_URL + "/download", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                url: this.state.url
-            })
-        })
-            .then((response) => {
-                if (!response.ok) throw Error(response.status);
-                return response;
-            })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    if (result.status === "OK") {
-                        this.setState({
-                            notType: "success",
-                            notMessage: txt.added_to_queue,
-                            notOpen: true
-                        });
-                    } else if (result.status === "ALREADY_ADDED") {
-                        this.setState({
-                            notType: "warning",
-                            notMessage: txt.error_already_added,
-                            notOpen: true
-                        });
-                    }
-                },
-                (error) => {
-                    this.setState({
-                        notType: "error",
-                        notMessage: txt.error_download,
-                        notOpen: true
-                    });
-                }
-            )
-            .catch((error) => {
-                this.setState({
-                    notType: "error",
-                    notMessage: txt.error_download,
-                    notOpen: true
-                });
-            });
+    state = {
+        infoContent: "",
+        errors: {}
     };
 
-    getInfo = (evt) => {
-        const { classes } = this.props;
-
-        let validation_error = this.validate();
-        if (validation_error !== "") {
+    download = () => {
+        let errors = this.validate(this.state.url);        
+        if (Object.keys(errors).length > 0) {
             this.setState({
-                notType: "error",
-                notMessage: txt.error_validation_title + ": " + validation_error,
-                notOpen: true
+                errors: errors
+            });
+
+            return;
+        }
+        
+
+        this.setState({
+            errors: {}
+        });
+
+        download(this.url, this.props.sendNotification);
+    }
+
+    info = (evt) => {
+        let errors = this.validate(this.state.url);
+        if (Object.keys(errors).length > 0) {
+            this.setState({
+                errors: errors
             });
 
             return;
         }
 
-        fetch(Config.API_SERVER_URL + "/info", {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                url: this.state.url
-            })
-        })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    let image = "track.png"
-                    if (result.image && result.image !== "") {
-                        image = result.image
-                    }
-
-                    let tracks = "";
-                    if(result.type !== 'TRACK'){
-                        tracks = result.tracks.map((element, i) => {
-                            return (
-                                <GridListTile key={i} style={{ height: '180px' }}>
-                                    <img src="track.png" className={classes.image} alt={element.name} />
-                                    <GridListTileBar
-                                        title={element.name}
-                                        subtitle={
-                                            <div>
-                                                <span>{txt.album}: {element.album}</span>
-                                                <br /><br />
-                                                {element.artists !== "" &&
-                                                    <span>{txt.by}: {element.artists}</span>
-                                                }
-                                            </div>
-                                        }
-                                    />
-                                </GridListTile>
-                            )
-                        });
-                    }
-
-                    this.setState({
-                        infoContent:
-                            <div>
-                                <Card className={classes.card}>
-                                    <div className={classes.details}>
-                                        <CardContent className={classes.content}>
-                                            <Typography component="h5" variant="h5">
-                                                {result.name}
-                                            </Typography>
-                                            {result.album !== "" &&
-                                                <Typography variant="subtitle2" color="textSecondary">
-                                                    {txt.album}: {result.album}
-                                                </Typography>
-                                            }
-                                            {result.description !== "" &&
-                                                <Typography variant="subtitle2" color="textSecondary">
-                                                    {txt.by}: {result.description}
-                                                </Typography>
-                                            }
-                                            {result.artists !== "" &&
-                                                <Typography variant="subtitle2" color="textSecondary">
-                                                    {txt.by}: {result.artists}
-                                                </Typography>
-                                            }
-                                        </CardContent>
-                                    </div>
-                                    <CardMedia
-                                        className={classes.cover}
-                                        image={image}
-                                        title={result.name}
-                                    />
-                                </Card>
-                                {tracks !=="" &&
-                                <br />
-                                }
-                                {tracks !=="" &&
-                                <GridList cols={3} cellHeight={180} spacing={2} className={classes.gridList}>
-                                    {tracks}
-                                </GridList>
-                                }
-                            </div>
-                    });
-                },
-                (error) => {
-                    this.setState({
-                        notType: "error",
-                        notMessage: txt.error_info,
-                        notOpen: true
-                    });
-                }
-            )
-            .catch((error) => {
-                this.setState({
-                    notType: "error",
-                    notMessage: txt.error_info,
-                    notOpen: true
-                });
-            });
+        this.setState({
+            infoContent: <Info url={this.state.url} sendNotification={this.props.sendNotification} />,
+            errors: {}
+        });
     }
 
     handleInputChange = (event) => {
@@ -307,12 +182,6 @@ class ContentDownload extends React.Component {
 
         this.setState({
             [name]: value
-        });
-    };
-
-    onCloseNotification = () => {
-        this.setState({
-            notOpen: false
         });
     };
 
@@ -338,6 +207,7 @@ class ContentDownload extends React.Component {
                                     <ListItem>
                                         <TextField
                                             name="url"
+                                            error={'url' in this.state.errors && this.state.errors['url']}
                                             variant="outlined"
                                             label={txt.field_url}
                                             style={{ margin: 8 }}
@@ -349,10 +219,10 @@ class ContentDownload extends React.Component {
                                             }}
                                             onChange={this.handleInputChange}
                                         />
-                                        <Button variant="contained" color="secondary" className={classes.button} onClick={this.getInfo}>
+                                        <Button variant="contained" color="secondary" className={classes.button} onClick={this.info}>
                                             {txt.button_info}
                                         </Button>
-                                        <Button variant="contained" color="primary" className={classes.button} onClick={this.download}>
+                                        <Button variant="contained" color="primary" className={classes.button} onClick={() => this.download(this.state.url)}>
                                             {txt.button_download}
                                         </Button>
                                     </ListItem>
@@ -364,7 +234,6 @@ class ContentDownload extends React.Component {
                         </Grid>
                     </Paper>
                 </Typography>
-                <Notification open={this.state.notOpen} onClose={this.onCloseNotification} variant={this.state.notType} message={this.state.notMessage} />
             </main>
         );
     }
@@ -372,6 +241,7 @@ class ContentDownload extends React.Component {
 
 ContentDownload.propTypes = {
     classes: PropTypes.object.isRequired,
+    sendNotification: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(ContentDownload);

@@ -88,7 +88,7 @@ def search():
 
         log.info("Searching[%s]", query)
 
-        items = spotdl.search(query, max_results_per_type=const.config.search_max_results)
+        items = spotdl.search(query, max_results_per_type=int(const.config.search_max_results))
 
         return jsonify(items)
     except:
@@ -147,6 +147,8 @@ def put_settings():
 
     try:
         config.save_config(request.json['settings'])
+
+        config.init_config()
 
         return jsonify({'status': 'OK'})
     except:

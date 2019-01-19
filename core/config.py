@@ -2,8 +2,7 @@ import api
 import core
 from core import const
 from collections import MutableMapping, namedtuple
-
-log = const.log
+import copy
 
 import logging
 import yaml
@@ -12,7 +11,7 @@ import argparse
 import os
 import sys
 
-
+log = const.log
 _LOG_LEVELS_STR = ['INFO', 'WARNING', 'ERROR', 'DEBUG']
 
 _default_conf = {
@@ -29,9 +28,10 @@ _default_conf = {
                         'no_metadata'            : False,
                         'no_spaces'              : False,
                         'output_ext'             : '.mp3',
-                        'overwrite'              : 'prompt',
+                        'overwrite'              : 'force',
+                        'cache_ttl'              : 600,
                         'search_format'          : '{artist} - {track_name} song',
-                        'search_max_results'     : 9,
+                        'search_max_results'     : 20,
                         # Generate the token. Please respect these credentials :)
                         'spotify_auth'           : {
                             'client_id'             : '4fe3fecfe5334023a1472516cc99d805',
@@ -42,6 +42,10 @@ _default_conf = {
                         'youtube_api_key'        : 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0',
                 }
             }
+
+
+def _get_config_file_name():
+    return os.getenv('CONFIG_FILE_PATH', os.path.join(sys.path[0], 'config.yml'))
 
 
 def _merge(default, config):
@@ -59,38 +63,47 @@ def _get_config(config_file):
         log.info('Writing default configuration to {0}:'.format(config_file))
         with open(config_file, 'w') as ymlfile:
             yaml.dump(_default_conf, ymlfile, default_flow_style=False)
-            cfg = _default_conf
-
-        for line in yaml.dump(_default_conf['spotify_downloader'], default_flow_style=False).split('\n'):
-            if line.strip():
-                log.info(line.strip())
+            cfg = copy.deepcopy(_default_conf)
 
     return cfg['spotify_downloader']
 
 
-def _isnamedtupleinstance(x):
-    _type = type(x)
-    bases = _type.__bases__
-    if len(bases) != 1 or bases[0] != tuple:
-        return False
-    fields = getattr(_type, '_fields', None)
-    if not isinstance(fields, tuple):
-        return False
-    return all(type(i)==str for i in fields)
+class _DotDictify(dict):
+    MARKER = object()
+
+    def __init__(self, value=None):
+        if value is None:
+            pass
+        elif isinstance(value, dict):
+            for key in value:
+                self.__setitem__(key, value[key])
+        else:
+            raise TypeError('expected dict')
+
+    def __setitem__(self, key, value):
+        if isinstance(value, dict) and not isinstance(value, _DotDictify):
+            value = _DotDictify(value)
+        super(_DotDictify, self).__setitem__(key, value)
+
+    def __getitem__(self, key):
+        found = self.get(key, _DotDictify.MARKER)
+        if found is _DotDictify.MARKER:
+            found = _DotDictify()
+            super(_DotDictify, self).__setitem__(key, found)
+        return found
+
+    __setattr__, __getattr__ = __setitem__, __getitem__
 
 def _unpack(dictionary):
-    for key, value in dictionary.items():
-            if isinstance(value, dict):
-                dictionary[key] = _unpack(value)
-    return namedtuple('GenericDict', dictionary.keys())(**dictionary)
+    return _DotDictify(dictionary)
+
 
 def _load_config():
-    config_file = os.path.join(sys.path[0], 'config.yml')
-    config = _merge(_default_conf['spotify_downloader'], _get_config(config_file))
-
-    config['folder'] = os.path.relpath(config['folder'], os.getcwd())
+    config = _merge(_default_conf['spotify_downloader'],
+                    _get_config(_get_config_file_name()))
 
     return config
+
 
 def _flatten(d, parent_key='', sep='.'):
     items = []
@@ -101,6 +114,7 @@ def _flatten(d, parent_key='', sep='.'):
         else:
             items.append((new_key, v))
     return dict(items)
+
 
 def _unflatten(d, sep='.'):
     resultDict = dict()
@@ -116,6 +130,7 @@ def _unflatten(d, sep='.'):
 
     return resultDict
 
+
 def get_config_dict():
     return _flatten(_load_config())
 
@@ -123,16 +138,12 @@ def get_config_dict():
 def save_config(_conf):
     conf = _unflatten(_conf)
 
-    config_file = os.path.join(sys.path[0], 'config.yml')
-
     final_config = {
         'spotify_downloader': conf
     }
 
-    with open(config_file, 'w') as ymlfile:
-        cfg = yaml.dump(final_config, ymlfile)
-
-    init_config()
+    with open(_get_config_file_name(), 'w') as ymlfile:
+        yaml.dump(final_config, ymlfile)
 
 
 def init_config():

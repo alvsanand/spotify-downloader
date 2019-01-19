@@ -1,0 +1,20 @@
+[run]
+branch = True
+source =
+    core
+    api
+omit = 
+    env/*
+    tests/*
+    *__init__*
+    *__pycache__*
+
+
+[report]
+exclude_lines =
+    def init():
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+ignore_errors = True

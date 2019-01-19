@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 from core import const
 from core.const import log
 from slugify import SLUG_OK, slugify
@@ -18,47 +19,34 @@ formats = { 0  : 'track_name',
             11 : 'isrc',
             12 : 'number' }
 
-
-def trim_song(text_file):
-    """ Remove the first song from file. """
-    with open(text_file, 'r') as file_in:
-        data = file_in.read().splitlines(True)
-    with open(text_file, 'w') as file_out:
-        file_out.writelines(data[1:])
-    return data[0]
+_SPOTIFY_RE = re.compile("https://open.spotify.com/.+")
+_YOUTUBE_RE = re.compile("https://www.youtube.com/watch\\?v=.+")
 
 
-def is_spotify(raw_song):
-    """ Check if the input song is a Spotify link. """
-    status = len(raw_song) == 22 and raw_song.replace(" ", "%20") == raw_song
-    status = status or raw_song.find('spotify') > -1
-    return status
+def is_spotify(url):    
+    return _SPOTIFY_RE.match(url)
 
 
-def is_youtube(raw_song):
-    """ Check if the input song is a YouTube link. """
-    status = len(raw_song) == 11 and raw_song.replace(" ", "%20") == raw_song
-    status = status and not raw_song.lower() == raw_song
-    status = status or 'youtube.com/watch?v=' in raw_song
-    return status
+def is_youtube(url):    
+    return _YOUTUBE_RE.match(url)
 
 
 def format_string(string_format, tags, slugification=False, force_spaces=False):
     """ Generate a string of the format '[artist] - [song]' for the given spotify song. """
     format_tags = dict(formats)
-    format_tags[0]  = tags['name']
-    format_tags[1]  = tags['artists'][0]['name']
-    format_tags[2]  = tags['album']['name']
-    format_tags[3]  = tags['artists'][0]['name']
-    format_tags[4]  = tags['genre']
-    format_tags[5]  = tags['disc_number']
-    format_tags[6]  = tags['duration']
-    format_tags[7]  = tags['year']
-    format_tags[8]  = tags['release_date']
-    format_tags[9]  = tags['track_number']
-    format_tags[10] = tags['total_tracks']
-    format_tags[11] = tags['external_ids']['isrc']
-    format_tags[12] = tags['number']
+    format_tags[0]  = tags.get('name', '')
+    format_tags[1]  = tags.get('artists', [{'name': ''}])[0]['name']
+    format_tags[2]  = tags.get('album', {'name':''})['name']
+    format_tags[3]  = tags.get('artists', [{'name': ''}])[0]['name']
+    format_tags[4]  = tags.get('genre', '')
+    format_tags[5]  = tags.get('disc_number', '')
+    format_tags[6]  = tags.get('duration', '')
+    format_tags[7]  = tags.get('year', '')
+    format_tags[8]  = tags.get('release_date', '')
+    format_tags[9]  = tags.get('track_number', '')
+    format_tags[10] = tags.get('total_tracks', '')
+    format_tags[11] = tags.get('external_ids', {'isrc':''})['isrc']
+    format_tags[12] = tags.get('number', '')
 
     for tag in format_tags:
         if slugification:
@@ -78,7 +66,7 @@ def format_string(string_format, tags, slugification=False, force_spaces=False):
     return string_format
 
 
-def sanitize(title, ok='-_()[]{}\/'):
+def sanitize(title, ok='-_()[]{}\\/'):
     """ Generate filename of the song to be downloaded. """
 
     if const.config.no_spaces:

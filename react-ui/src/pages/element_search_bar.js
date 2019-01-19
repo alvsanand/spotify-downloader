@@ -8,7 +8,7 @@ import InputBase from '@material-ui/core/InputBase';
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         search_placeholder: "Search...",
@@ -60,7 +60,7 @@ const styles = theme => ({
     },
 });
 
-class Search extends React.Component {
+class SearchBar extends React.Component {
     state = {
         dialogOpen: false,
     };
@@ -110,8 +110,8 @@ class Search extends React.Component {
     }
 }
 
-Search.propTypes = {
+SearchBar.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Search);
+export default withStyles(styles)(SearchBar);

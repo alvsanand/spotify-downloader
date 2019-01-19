@@ -21,12 +21,12 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
-import Config from './config';
+import Config from '../config';
 
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         title: "Download History",
@@ -36,7 +36,8 @@ let txt = new LocalizedStrings({
         table_column_init_date: "Init time",
         table_column_end_date: "End time",
         table_column_status: "Status",
-        button_refresh: "Refresh"
+        button_refresh: "Refresh",
+        error_load: "Error while getting info about the downloads.",
     },
     es: {
         title: "Historial de Descargas",
@@ -46,7 +47,8 @@ let txt = new LocalizedStrings({
         table_column_init_date: "Hora Inicio",
         table_column_end_date: "Hora Fin",
         table_column_status: "Estado",
-        button_refresh: "Refrescar"
+        button_refresh: "Refrescar",
+        error_load: "Error al obtener información sobre las descargas.",
     }
 });
 
@@ -100,12 +102,14 @@ class ContentDownload extends React.Component {
                 this.setState({
                     items: []
                 });
+                this.props.sendNotification("error", txt.error_load);
             }
         )
         .catch((error) => {
             this.setState({
                 items: []
             });
+            this.props.sendNotification("error", txt.error_load);
         });
     };
 
@@ -213,6 +217,7 @@ class ContentDownload extends React.Component {
 
 ContentDownload.propTypes = {
     classes: PropTypes.object.isRequired,
+    sendNotification: PropTypes.func.isRequired,
 };
 
 export default withStyles(styles)(ContentDownload);

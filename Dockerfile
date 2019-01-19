@@ -1,7 +1,9 @@
 FROM python:3.6-alpine
 
 RUN apk add --no-cache \
-    ffmpeg nodejs nodejs-npm
+    ffmpeg \
+    nodejs nodejs-npm \
+    linux-headers libc-dev gcc 
 
 ADD react-ui/ /spotify-downloader/react-ui
 RUN cd /spotify-downloader/react-ui \

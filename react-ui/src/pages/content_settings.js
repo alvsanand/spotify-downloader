@@ -7,32 +7,119 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import { Paper } from '@material-ui/core';
 
-import Notification from './notification';
-import Config from './config';
+import Config from '../config';
 
 /*
 * Localization text
 */
-import LocalizedStrings from 'react-localization';
+import LocalizedStrings from '../LocalizedStrings';
 let txt = new LocalizedStrings({
     en: {
         title: "Settings",
         description: "Modify the configration of Spotify Downloader.",
         error_saving_settings: "Error while saving settings.",
         saved_settings: "Saved settings.",
-        button_save: "Save"
+        button_advanced: "Advanced",
+        button_simple: "Simple",
+        button_save: "Save",
     },
     es: {
         title: "Ajustes",
         description: "Modificar la configuración de Spotify Downloader.",
         error_saving_settings: "Error al guardar la configuración.",
         saved_settings: "Configuraciones guardadas.",
+        button_advanced: "Avanzado",
+        button_simple: "Sencillo",
         button_save: "Guardar"
     }
 });
+
+const settings_types = {
+    'avconv': {
+        type: "Boolean",
+        advanced: true
+    },
+    'download_only_metadata': {
+        type: "Boolean",
+        advanced: true
+    },
+    'file_format': {
+        type: "String",
+        advanced: false
+    },
+    'folder': {
+        type: "String",
+        advanced: true
+    },
+    'input_ext': {
+        type: "String",
+        advanced: true
+    },
+    'log_level': {
+        type: "String",
+        advanced: true
+    },
+    'match_by_string': {
+        type: "Boolean",
+        advanced: true
+    },
+    'max_downloads': {
+        type: "Integer",
+        advanced: false
+    },
+    'music_videos_only': {
+        type: "Boolean",
+        advanced: true
+    },
+    'no_metadata': {
+        type: "Boolean",
+        advanced: true
+    },
+    'no_spaces': {
+        type: "Boolean",
+        advanced: true
+    },
+    'output_ext': {
+        type: "String",
+        advanced: true
+    },
+    'overwrite': {
+        type: "String",
+        advanced: true
+    },
+    'cache_ttl': {
+        type: "Integer",
+        advanced: true
+    },
+    'search_format': {
+        type: "String",
+        advanced: true
+    },
+    'search_max_results': {
+        type: "Integer",
+        advanced: true
+    },
+    'spotify_auth.client_id': {
+        type: "String",
+        advanced: false
+    },
+    'spotify_auth.client_secret': {
+        type: "String",
+        advanced: false
+    },
+    'trim_silence': {
+        type: "Boolean",
+        advanced: true
+    },
+    'youtube_api_key': {
+        type: "String",
+        advanced: false
+    },
+}
 
 const styles = theme => ({
     root: {
@@ -60,17 +147,129 @@ const styles = theme => ({
         width: theme.typography.display1.fontSize,
         height: theme.typography.display1.fontSize
     },
+    booleanMenu: {
+        width: 200,
+    },
 });
 
-class Settings extends React.Component {
+class SettingsItem extends React.Component {
     state = {
-        notType: "info",
-        notMessage: "",
-        notOpen: false,
-        settings: {}
+        settings: {},
+        advanced: false,
+        errors: {}
     };
 
+    render() {
+        const { classes } = this.props;
+        const { name, type, error, label, value, onChange } = this.props;
+
+        let field
+        if (type === "Boolean") {
+            field =
+                <TextField
+                    required
+                    name={name}
+                    error={error}
+                    variant="outlined"
+                    label={label}
+                    style={{ margin: 8 }}
+                    select
+                    fullWidth
+                    margin="normal"
+                    SelectProps={{
+                        MenuProps: {
+                            className: classes.booleanMenu,
+                        },
+                    }}
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    value={value}
+                    onChange={onChange}
+                >
+                    <MenuItem value={true}>True</MenuItem>
+                    <MenuItem value={false}>False</MenuItem>
+                </TextField>
+        }
+        else if (type === "Integer") {
+            field =
+                <TextField
+                    required
+                    name={name}
+                    error={error}
+                    type="number"
+                    variant="outlined"
+                    label={label}
+                    style={{ margin: 8 }}
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    value={value}
+                    onChange={onChange}
+                />
+        }
+        else {
+            field =
+                <TextField
+                    required
+                    name={name}
+                    error={error}
+                    type="text"
+                    variant="outlined"
+                    label={label}
+                    style={{ margin: 8 }}
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    value={value}
+                    onChange={onChange}
+                />
+        }
+
+        return field;
+    }
+}
+
+class ContentSettings extends React.Component {
+    state = {
+        settings: {},
+        advanced: false,
+        errors: {}
+    };
+
+    validate() {
+        let errors = {};
+
+        for (var property in this.state.settings) {
+            if (this.state.settings.hasOwnProperty(property)) {
+                if (this.state.settings[property] === "") {
+                    errors[property] = true;
+                }
+            }
+        }
+
+        return errors;
+    }
+
     save = (evt) => {
+        let errors = this.validate(this.state.url);
+        console.log(errors);
+        if (Object.keys(errors).length > 0) {
+            this.setState({
+                errors: errors
+            });
+
+            return;
+        }
+
+        this.setState({
+            errors: {}
+        });
+
         fetch(Config.API_SERVER_URL + "/settings", {
             method: 'PUT',
             headers: {
@@ -81,42 +280,26 @@ class Settings extends React.Component {
                 settings: this.state.settings
             })
         })
-        .then((response) => {
-            if (!response.ok) throw Error(response.status);
-            return response;
-        })
-        .then(res => res.json())
-        .then(
-            (result) => {
-                if (result.status === "OK") {
-                    this.setState({
-                        notType:    "success",
-                        notMessage: txt.saved_settings,
-                        notOpen: true
-                    });
-                } else {
-                    this.setState({
-                        notType:    "error",
-                        notMessage: txt.error_saving_settings,
-                        notOpen: true
-                    });
+            .then((response) => {
+                if (!response.ok) throw Error(response.status);
+                return response;
+            })
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    if (result.status === "OK") {
+                        this.props.sendNotification("success", txt.saved_settings);
+                    } else {
+                        this.props.sendNotification("error", txt.error_saving_settings);
+                    }
+                },
+                (error) => {
+                    this.props.sendNotification("error", txt.error_saving_settings);
                 }
-            },
-            (error) => {
-                this.setState({
-                    notType:    "error",
-                    notMessage: txt.error_saving_settings,
-                    notOpen: true
-                });
-            }
-        )
-        .catch((error) => {
-            this.setState({
-                notType:    "error",
-                notMessage: txt.error_saving_settings,
-                notOpen: true
+            )
+            .catch((error) => {
+                this.props.sendNotification("error", txt.error_saving_settings);
             });
-        });
     };
 
     load() {
@@ -127,28 +310,28 @@ class Settings extends React.Component {
                 'Content-Type': 'application/json',
             }
         })
-        .then((response) => {
-            if (!response.ok) throw Error(response.status);
-            return response;
-        })
-        .then(res => res.json())
-        .then(
-            (result) => {
-                this.setState({
-                    settings: result.settings
-                });
-            },
-            (error) => {
+            .then((response) => {
+                if (!response.ok) throw Error(response.status);
+                return response;
+            })
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        settings: result.settings,
+                    });
+                },
+                (error) => {
+                    this.setState({
+                        settings: {}
+                    });
+                }
+            )
+            .catch((error) => {
                 this.setState({
                     settings: {}
                 });
-            }
-        )
-        .catch((error) => {
-            this.setState({
-                settings: {}
             });
-        });
     };
 
     componentDidMount() {
@@ -166,20 +349,29 @@ class Settings extends React.Component {
 
     handleInputChange = (event) => {
         const target = event.target;
-        const value = target.type === 'checkbox' ? target.checked : target.value;
+        let value = target.type === 'checkbox' ? target.checked : target.value;
         const name = target.name;
+
+
+        let type = "String"
+        if (name in settings_types) {
+            type = settings_types[name].type;
+        }
+        if (type === "Integer") {
+            value = parseInt(value);
+        }
+        else if (type === "Boolean") {
+            switch (value.toString().toLowerCase().trim()) {
+                case "true": case "yes": case "1": value = true; break;
+                case "false": case "no": case "0": case null: default: value = false; break;
+            }
+        }
 
         let settings = this.state.settings
         settings[name] = value
 
         this.setState({
             settings: settings
-        });
-    };
-
-    onCloseNotification = () => {
-        this.setState({
-            notOpen: false
         });
     };
 
@@ -191,23 +383,25 @@ class Settings extends React.Component {
             let value = settings[key];
             let label = this.formatLabel(key);
 
+            let type = "Default";
+            let hidden = false;
+            if (key in settings_types) {
+                type = settings_types[key].type;
+
+                hidden = !(!settings_types[key].advanced || this.state.advanced);
+            }
+
+            if (hidden) {
+                return "";
+            }
+
+            let error = key in this.state.errors && this.state.errors[key]
+
             return (
-                <ListItem key={i}>
-                    <TextField
-                        name={key}
-                        variant="outlined"
-                        label={label}
-                        style={{ margin: 8 }}
-                        fullWidth
-                        margin="normal"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        value={value}
-                        onChange={this.handleInputChange}
-                    />
+                <ListItem key={key}>
+                    <SettingsItem classes={classes} name={key} type={type} error={error} label={label} value={value} onChange={this.handleInputChange} />
                 </ListItem>
-            )
+            );
         });
 
         return (
@@ -228,8 +422,12 @@ class Settings extends React.Component {
                                     </ListItem>
                                     {fields}
                                     <ListItem>
+                                        <Button variant="contained" className={classes.button} onClick={() => this.setState({ advanced: !this.state.advanced })}>
+                                            {!this.state.advanced && txt.button_advanced}
+                                            {this.state.advanced && txt.button_simple}
+                                        </Button>
                                         <Button variant="contained" color="primary" className={classes.button} onClick={this.save}>
-                                        {txt.button_save}
+                                            {txt.button_save}
                                         </Button>
                                     </ListItem>
                                 </List>
@@ -237,14 +435,14 @@ class Settings extends React.Component {
                         </Grid>
                     </Paper>
                 </Typography>
-                <Notification open={this.state.notOpen} onClose={this.onCloseNotification} variant={this.state.notType} message={this.state.notMessage}/>
             </main>
         );
     }
 }
 
-Settings.propTypes = {
+ContentSettings.propTypes = {
     classes: PropTypes.object.isRequired,
+    sendNotification: PropTypes.func.isRequired,
 };
 
-export default withStyles(styles)(Settings);
+export default withStyles(styles)(ContentSettings);

@@ -3,6 +3,7 @@ Music/
 *.txt
 upload.sh
 .pytest_cache/
+.coverage
 
 
 # Byte-compiled / optimized / DLL files
