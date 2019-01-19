@@ -1,7 +1,7 @@
 # Spotify-Downloader
 
 [![Build Status](https://travis-ci.com/alvsanand/spotify-downloader.svg?branch=master)](https://travis-ci.com/alvsanand/spotify-downloader)
-[![Docker Build Status](https://img.shields.io/docker/build/alvsanand/spotify-downloader.svg)](https://hub.docker.com/r/alvsanand/spotify-downloader)
+[![Docker Build Status](https://img.shields.io/docker/build/alvsanand/spotify-downloader.svg)](https://cloud.docker.com/u/alvsanand/repository/docker/alvsanand/spotify-downloader)
 
 This is a more user friendly version of the fantastic [Spotify Downloader](https://github.com/ritiek/spotify-downloader) of [ritiek](https://github.com/ritiek).
 
