@@ -84,7 +84,8 @@ class Converter:
         if self.trim_silence:
             ffmpeg_params += '-af silenceremove=start_periods=1 '
 
-        command = ffmpeg_pre.split() + [self.input_file] + ffmpeg_params.split() + [self.output_file]
+        command = ffmpeg_pre.split() + [self.input_file] + \
+            ffmpeg_params.split() + [self.output_file]
 
         log.debug(command)
         return subprocess.call(command)

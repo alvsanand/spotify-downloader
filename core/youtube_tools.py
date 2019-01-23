@@ -6,7 +6,6 @@ from core import internals
 from core import const
 
 import os
-import pprint
 
 from fuzzywuzzy import fuzz
 
@@ -110,8 +109,9 @@ class GenerateYouTubeURL:
         if meta_tags is None:
             self.search_query = raw_song
         else:
-            self.search_query = internals.format_string(const.config.search_format,
-                                                        meta_tags, force_spaces=True)
+            self.search_query = internals.format_string(
+                                    const.config.search_format,
+                                    meta_tags, force_spaces=True)
 
     def _best_match(self, videos):
         if not self.meta_tags:
@@ -119,7 +119,7 @@ class GenerateYouTubeURL:
             # from Youtube because the proper song length is unknown
             result = videos[0]
             log.debug(
-                'Since no metadata found on Spotify, going with the first result')
+                'Since no metadata found on Spotify, first result')
         else:
             if const.config.match_by_string:
                 sanitize_search = internals.sanitize(self.search_query).lower()
@@ -130,29 +130,34 @@ class GenerateYouTubeURL:
                 ), videos))
 
                 sorted_videos_with_ratio = sorted(videos_with_ratio,
-                                                  key=lambda x: x[0], reverse=True)
+                                                  key=lambda x: x[0],
+                                                  reverse=True)
 
                 result = sorted_videos_with_ratio[0][1]
 
                 log.info('_best_match: {0} => {1}'.format(
                     self.search_query, result['title']))
             else:
-                # filter out videos that do not have a similar length to the Spotify song
+                # filter out videos that do not have a similar
+                # length to the Spotify song
                 duration_tolerance = 10
                 max_duration_tolerance = 20
                 possible_videos_by_duration = []
                 const.config.search_format.split(" ")
 
-                # start with a reasonable duration_tolerance, and increment duration_tolerance
-                # until one of the Youtube results falls within the correct duration or
-                # the duration_tolerance has reached the max_duration_tolerance
+                # start with a reasonable duration_tolerance, and increment
+                # duration_tolerance until one of the Youtube results falls
+                # within the correct duration or the duration_tolerance has
+                # reached the max_duration_tolerance
                 while len(possible_videos_by_duration) == 0:
                     possible_videos_by_duration = list(filter(lambda x: abs(
-                        x['seconds'] - self.meta_tags['duration']) <= duration_tolerance, videos))
+                        x['seconds'] - self.meta_tags['duration']) <=
+                        duration_tolerance, videos))
                     duration_tolerance += 1
                     if duration_tolerance > max_duration_tolerance:
                         log.error("{0} by {1} was not found.\n".format(
-                            self.meta_tags['name'], self.meta_tags['artists'][0]['name']))
+                                 self.meta_tags['name'],
+                                 self.meta_tags['artists'][0]['name']))
                         return None
 
                 result = possible_videos_by_duration[0]
@@ -179,7 +184,8 @@ class GenerateYouTubeURL:
         items_parse = BeautifulSoup(item, "html.parser")
 
         videos = []
-        for x in items_parse.find_all('div', {'class': 'yt-lockup-dismissable yt-uix-tile'}):
+        for x in items_parse.find_all(
+                'div', {'class': 'yt-lockup-dismissable yt-uix-tile'}):
 
             if not is_video(x):
                 continue
@@ -191,11 +197,13 @@ class GenerateYouTubeURL:
             try:
                 videotime = x.find('span', class_="video-time").get_text()
             except AttributeError:
-                log.debug('Could not find video duration on YouTube, retrying..')
-                return self.scrape(bestmatch=bestmatch, tries_remaining=tries_remaining-1)
+                log.debug('Could not find video duration on YT, retrying..')
+                return self.scrape(bestmatch=bestmatch,
+                                   tries_remaining=tries_remaining-1)
 
-            youtubedetails = {'link': link, 'title': title, 'videotime': videotime,
-                              'seconds': internals.get_sec(videotime)}
+            youtubedetails = {
+                'link': link, 'title': title, 'videotime': videotime,
+                'seconds': internals.get_sec(videotime)}
             videos.append(youtubedetails)
 
         if bestmatch:
@@ -221,11 +229,11 @@ class GenerateYouTubeURL:
         log.debug('query: {0}'.format(query))
 
         data = pafy.call_gdata('search', query)
-        data['items'] = list(filter(lambda x: x['id'].get('videoId') is not None,
-                                    data['items']))
-        query_results = {'part': 'contentDetails,snippet,statistics',
-                         'maxResults': 50,
-                         'id': ','.join(i['id']['videoId'] for i in data['items'])}
+        data['items'] = list(filter(lambda x: x['id'].get(
+            'videoId') is not None, data['items']))
+        query_results = {
+            'part': 'contentDetails,snippet,statistics', 'maxResults': 50,
+            'id': ','.join(i['id']['videoId'] for i in data['items'])}
         log.debug('query_results: {0}'.format(query_results))
 
         vdata = pafy.call_gdata('videos', query_results)
@@ -234,9 +242,11 @@ class GenerateYouTubeURL:
         for x in vdata['items']:
             duration_s = pafy.playlist.parseISO8591(
                 x['contentDetails']['duration'])
-            youtubedetails = {'link': x['id'], 'title': x['snippet']['title'],
-                              'videotime': internals.videotime_from_seconds(duration_s),
-                              'seconds': duration_s}
+            youtubedetails = {
+                'link': x['id'],
+                'title': x['snippet']['title'],
+                'videotime': internals.videotime_from_seconds(duration_s),
+                'seconds': duration_s}
             videos.append(youtubedetails)
 
         if bestmatch:

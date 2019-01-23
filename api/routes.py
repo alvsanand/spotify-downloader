@@ -1,12 +1,8 @@
-from flask_cors import CORS
-from flask import Blueprint, redirect, request
-from flask import abort, jsonify
-from api.downloaders import SpotifyDownloader
+from flask import Blueprint, abort, jsonify, redirect, request
 
-from core import config
-from core import const
+from api.downloaders import SpotifyDownloader
+from core import config, const, spotdl
 from core.const import log
-from core import spotdl
 
 app = Blueprint('/', 'main')
 
@@ -35,7 +31,7 @@ current_downloads = {}
 
 @app.route('/download', methods=['POST'])
 def post_download():
-    if not request.json or not 'url' in request.json:
+    if not request.json or 'url' not in request.json:
         abort(400, 'Error downloading playlist info: url obligatory')
 
     try:
@@ -53,7 +49,7 @@ def post_download():
             return jsonify({'status': 'OK'})
         else:
             return jsonify({'status': 'ALREADY_ADDED'})
-    except:
+    except Exception:
         log.error("Error downloading playlist info", exc_info=True)
 
         abort(400, 'Error downloading playlist info')
@@ -61,7 +57,7 @@ def post_download():
 
 @app.route('/info', methods=['POST'])
 def info():
-    if not request.json or not 'url' in request.json:
+    if not request.json or 'url' not in request.json:
         abort(400, 'Error getting playlist info: url obligatory')
 
     try:
@@ -72,7 +68,7 @@ def info():
         info = spotdl.fetch_info(url)
 
         return jsonify(info)
-    except:
+    except Exception:
         log.error("Error getting playlist info", exc_info=True)
 
         abort(500, 'Error getting playlist info')
@@ -80,7 +76,7 @@ def info():
 
 @app.route('/search', methods=['POST'])
 def search():
-    if not request.json or not 'query' in request.json:
+    if not request.json or 'query' not in request.json:
         abort(400, 'Error searching: query obligatory')
 
     try:
@@ -88,10 +84,11 @@ def search():
 
         log.info("Searching[%s]", query)
 
-        items = spotdl.search(query, max_results_per_type=int(const.config.search_max_results))
+        items = spotdl.search(query, max_results_per_type=int(
+            const.config.search_max_results))
 
         return jsonify(items)
-    except:
+    except Exception:
         log.error("Error searching", exc_info=True)
 
         abort(500, 'Error searching')
@@ -103,12 +100,12 @@ def download_history():
 
     try:
         items = list(map(lambda d: {
-                'url': d[0],
-                'name': d[1].getName(),
-                'status': d[1].getStatus().value,
-                'init_date': d[1].get_init_date(format="%H:%M:%S"),
-                'end_date': d[1].get_end_date(format="%H:%M:%S"),
-            },
+            'url': d[0],
+            'name': d[1].get_name(),
+            'status': d[1].get_status().value,
+            'init_date': d[1].get_init_date(format="%H:%M:%S"),
+            'end_date': d[1].get_end_date(format="%H:%M:%S"),
+        },
             current_downloads.items()))
 
         response = {
@@ -116,7 +113,7 @@ def download_history():
         }
 
         return jsonify(response)
-    except:
+    except Exception:
         log.error("Error retrieving download_history", exc_info=True)
 
         abort(500, 'Error retrieving download_history')
@@ -132,7 +129,7 @@ def get_settings():
         }
 
         return jsonify(settings)
-    except:
+    except Exception:
         log.error("Error Retrieving settings", exc_info=True)
 
         abort(500, 'Error Retrieving settings')
@@ -140,7 +137,7 @@ def get_settings():
 
 @app.route('/settings', methods=['PUT'])
 def put_settings():
-    if not request.json or not 'settings' in request.json:
+    if not request.json or 'settings' not in request.json:
         abort(400, 'Error Saving settings: settings obligatory')
 
     log.info("Saving settings")
@@ -151,7 +148,7 @@ def put_settings():
         config.init_config()
 
         return jsonify({'status': 'OK'})
-    except:
+    except Exception:
         log.error("Error Saving settings", exc_info=True)
 
         abort(500, 'Error Saving settings')

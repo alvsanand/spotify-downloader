@@ -1,11 +1,9 @@
-from core import internals
+import os
+
+import pytest
 
 from core import config as cfg
-
-import sys
-import os
-import subprocess
-import pytest
+from core import internals
 
 
 class TestUtilities:
@@ -23,11 +21,13 @@ class TestUtilities:
         return config_file
 
     def test_is_spotify(self):
-        url = "https://open.spotify.com/user/spotify/playlist/37i9dQZF1DX6PYajiT4pAf?si=PxCM89KITte-N40hxgykqw"
+        url = "https://open.spotify.com/user/spotify/playlist/" + \
+              "37i9dQZF1DX6PYajiT4pAf?si=PxCM89KITte-N40hxgykqw"
         result = internals.is_spotify(url)
         assert result
 
-        url = "https://open.notspotify.com/user/spotify/playlist/37i9dQZF1DX6PYajiT4pAf?si=PxCM89KITte-N40hxgykqw"
+        url = "https://open.notspotify.com/user/spotify/playlist/" + \
+              "37i9dQZF1DX6PYajiT4pAf?si=PxCM89KITte-N40hxgykqw"
         result = internals.is_spotify(url)
         assert not result
 

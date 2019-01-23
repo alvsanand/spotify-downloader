@@ -1,57 +1,59 @@
 import os
-import sys
 import re
-from core import const
-from core.const import log
-from slugify import SLUG_OK, slugify
 
-formats = { 0  : 'track_name',
-            1  : 'artist',
-            2  : 'album',
-            3  : 'album_artist',
-            4  : 'genre',
-            5  : 'disc_number',
-            6  : 'duration',
-            7  : 'year',
-            8  : 'original_date',
-            9  : 'track_number',
-            10 : 'total_tracks',
-            11 : 'isrc',
-            12 : 'number' }
+from slugify import slugify
+
+from core import const
+
+formats = {0: 'track_name',
+           1: 'artist',
+           2: 'album',
+           3: 'album_artist',
+           4: 'genre',
+           5: 'disc_number',
+           6: 'duration',
+           7: 'year',
+           8: 'original_date',
+           9: 'track_number',
+           10: 'total_tracks',
+           11: 'isrc',
+           12: 'number'}
 
 _SPOTIFY_RE = re.compile("https://open.spotify.com/.+")
 _YOUTUBE_RE = re.compile("https://www.youtube.com/watch\\?v=.+")
 
 
-def is_spotify(url):    
+def is_spotify(url):
     return _SPOTIFY_RE.match(url)
 
 
-def is_youtube(url):    
+def is_youtube(url):
     return _YOUTUBE_RE.match(url)
 
 
-def format_string(string_format, tags, slugification=False, force_spaces=False):
-    """ Generate a string of the format '[artist] - [song]' for the given spotify song. """
+def format_string(
+        string_format, tags, slugification=False, force_spaces=False):
+    # Generate a string of the format '[artist] - [song]'
+    # for the given spotify song.
     format_tags = dict(formats)
-    format_tags[0]  = tags.get('name', '')
-    format_tags[1]  = tags.get('artists', [{'name': ''}])[0]['name']
-    format_tags[2]  = tags.get('album', {'name':''})['name']
-    format_tags[3]  = tags.get('artists', [{'name': ''}])[0]['name']
-    format_tags[4]  = tags.get('genre', '')
-    format_tags[5]  = tags.get('disc_number', '')
-    format_tags[6]  = tags.get('duration', '')
-    format_tags[7]  = tags.get('year', '')
-    format_tags[8]  = tags.get('release_date', '')
-    format_tags[9]  = tags.get('track_number', '')
+    format_tags[0] = tags.get('name', '')
+    format_tags[1] = tags.get('artists', [{'name': ''}])[0]['name']
+    format_tags[2] = tags.get('album', {'name': ''})['name']
+    format_tags[3] = tags.get('artists', [{'name': ''}])[0]['name']
+    format_tags[4] = tags.get('genre', '')
+    format_tags[5] = tags.get('disc_number', '')
+    format_tags[6] = tags.get('duration', '')
+    format_tags[7] = tags.get('year', '')
+    format_tags[8] = tags.get('release_date', '')
+    format_tags[9] = tags.get('track_number', '')
     format_tags[10] = tags.get('total_tracks', '')
-    format_tags[11] = tags.get('external_ids', {'isrc':''})['isrc']
+    format_tags[11] = tags.get('external_ids', {'isrc': ''})['isrc']
     format_tags[12] = tags.get('number', '')
 
     for tag in format_tags:
         if slugification:
             format_tags[tag] = sanitize(format_tags[tag],
-                                              ok='-_()[]{}')
+                                        ok='-_()[]{}')
         else:
             format_tags[tag] = str(format_tags[tag])
 
@@ -91,7 +93,8 @@ def videotime_from_seconds(time):
     if time < 3600:
         return '{0}:{1:02}'.format(time//60, time % 60)
 
-    return '{0}:{1:02}:{2:02}'.format((time//60)//60, (time//60) % 60, time % 60)
+    return '{0}:{1:02}:{2:02}'.format(
+        (time // 60) // 60, (time // 60) % 60, time % 60)
 
 
 def get_sec(time_str):

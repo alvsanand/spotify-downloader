@@ -1,21 +1,15 @@
-import spotipy
-import spotipy.oauth2 as oauth2
-import lyricwikia
-import os
+import pprint
 import re
+import time
 from enum import Enum
 
-from core import const
-from core import internals
-from core.const import log
-
+import lyricwikia
+import spotipy
+import spotipy.oauth2 as oauth2
 from titlecase import titlecase
-import pprint
-import sys
 
-import shutil
-import time
-
+from core import const, internals
+from core.const import log
 
 _token_expiration_time = None
 _spotify = None
@@ -125,12 +119,13 @@ def _fetch_playlist(playlist):
         return None
     playlist_id = splits[-1]
     try:
-        results = _getClient().user_playlist(username, playlist_id,
-                                             fields='tracks,next,name,images,artists,description')
+        results = _getClient().user_playlist(
+                    username, playlist_id,
+                    fields='tracks,next,name,images,artists,description')
     except spotipy.client.SpotifyException:
         log.error('Unable to find playlist', exc_info=True)
-        log.info(
-            'Make sure the playlist is set to publicly visible and then try again')
+        log.info('Make sure the playlist is set to ' +
+                 'publicly visible and then try again')
         return None
 
     return results
@@ -191,10 +186,11 @@ def search(query, max_results=10, _type=_SEARCH_TYPE.TRACK):
             items_key = '{0}s'.format(_type.value)
 
             if len(response[items_key]['items']) > 0:
-                current_offset = current_offset + len(response[items_key]['items'])
+                current_offset = current_offset + \
+                    len(response[items_key]['items'])
 
                 for i in response[items_key]['items']:
-                    results[i['id']]= i
+                    results[i['id']] = i
 
             if not response[items_key]['next'] \
                or len(results) >= max_results:

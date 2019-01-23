@@ -1,10 +1,11 @@
-from core import spotify_tools
-from core import config as cfg
-from unittest.mock import patch, Mock, MagicMock
-import pytest
-import time
 import os
-from core import const
+import time
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
+
+from core import config as cfg
+from core import const, spotify_tools
 
 
 class TestClient:
@@ -31,21 +32,21 @@ class TestClient:
             'expires_at': expiration_time
         }
 
-        with patch('spotipy.oauth2.SpotifyClientCredentials') as _credentials, \
-                patch('spotipy.Spotify', return_value=access_token) as _spotify:
-            _credentials.return_value = credentials
-            _spotify.return_value = "spotipy.Spotify"
+        with patch('spotipy.oauth2.SpotifyClientCredentials') as _credS, \
+                patch('spotipy.Spotify', return_value=access_token) as _spot:
+            _credS.return_value = credentials
+            _spot.return_value = "spotipy.Spotify"
 
             result = spotify_tools._getClient()
 
-            _credentials.assert_called_once_with(
+            _credS.assert_called_once_with(
                 client_id=const.config.spotify_auth.client_id,
                 client_secret=const.config.spotify_auth.client_secret
             )
             credentials.get_access_token.assert_called_once_with()
-            _spotify.assert_called_once_with(auth=access_token)
+            _spot.assert_called_once_with(auth=access_token)
 
-            assert result == _spotify.return_value
+            assert result == _spot.return_value
             assert spotify_tools._token_expiration_time == expiration_time
 
     def test__getClient_reload_token(self, init_config):
@@ -58,21 +59,21 @@ class TestClient:
             'expires_at': expiration_time
         }
 
-        with patch('spotipy.oauth2.SpotifyClientCredentials') as _credentials, \
-                patch('spotipy.Spotify', return_value=access_token) as _spotify:
-            _credentials.return_value = credentials
-            _spotify.return_value = "spotipy.Spotify"
+        with patch('spotipy.oauth2.SpotifyClientCredentials') as _creds, \
+                patch('spotipy.Spotify', return_value=access_token) as _spot:
+            _creds.return_value = credentials
+            _spot.return_value = "spotipy.Spotify"
 
             result = spotify_tools._getClient()
 
-            _credentials.assert_called_with(
+            _creds.assert_called_with(
                 client_id=const.config.spotify_auth.client_id,
                 client_secret=const.config.spotify_auth.client_secret
             )
             credentials.get_access_token.assert_called_with()
-            _spotify.assert_called_with(auth=access_token)
+            _spot.assert_called_with(auth=access_token)
 
-            assert result == _spotify.return_value
+            assert result == _spot.return_value
             assert spotify_tools._token_expiration_time == expiration_time
 
             time.sleep(0.2)
@@ -84,14 +85,14 @@ class TestClient:
 
             result = spotify_tools._getClient()
 
-            _credentials.assert_called_with(
+            _creds.assert_called_with(
                 client_id=const.config.spotify_auth.client_id,
                 client_secret=const.config.spotify_auth.client_secret
             )
             credentials.get_access_token.assert_called_with()
-            _spotify.assert_called_with(auth=access_token)
+            _spot.assert_called_with(auth=access_token)
 
-            assert result == _spotify.return_value
+            assert result == _spot.return_value
             assert spotify_tools._token_expiration_time == expiration_time
 
 
@@ -206,7 +207,8 @@ class TestFetchMethods:
             assert result == expected_result
 
     def test__fetch_playlist_1(self):
-        url = "https://open.spotify.com/user/txcwkvj8v3kcfyrep95xbsara/playlist/15C6EYuvuFdpnA5ViyGIBr"
+        url = "https://open.spotify.com/user/txcwkvj8v3kcfyrep95xbsara/" + \
+              "playlist/15C6EYuvuFdpnA5ViyGIBr"
         expected_param1 = 'txcwkvj8v3kcfyrep95xbsara'
         expected_param2 = '15C6EYuvuFdpnA5ViyGIBr'
         expected_result = 'my_playlist_id'
@@ -251,9 +253,8 @@ class TestFetchMethods:
 class TestMetadata:
     def test_metadata(self):
         raw_song = 'https://open.spotify.com/track/0JlS7BXXD07hRmevDnbPDU'
-        
+
         expect_number = 23
         global meta_tags
         meta_tags = spotify_tools.generate_metadata(raw_song)
         assert len(meta_tags) == expect_number
-

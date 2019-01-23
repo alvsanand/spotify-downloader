@@ -1,11 +1,10 @@
 
 import concurrent.futures.thread as thread
-from enum import Enum
-from core import const
-from core.const import log
-
-from core import spotdl
 import time
+from enum import Enum
+
+from core import const, spotdl
+from core.const import log
 
 
 class DownloadStatus(Enum):
@@ -16,15 +15,15 @@ class DownloadStatus(Enum):
     ERROR = "ERROR"
 
 
-_downloadersThreadPool = None
+_downloaders_thread_pool = None
 
 
 def init():
-    global _downloadersThreadPool
+    global _downloaders_thread_pool
 
-    if _downloadersThreadPool:
-        _downloadersThreadPool.shutdown()
-    _downloadersThreadPool = thread.ThreadPoolExecutor(
+    if _downloaders_thread_pool:
+        _downloaders_thread_pool.shutdown()
+    _downloaders_thread_pool = thread.ThreadPoolExecutor(
         int(const.config.max_downloads))
 
 
@@ -37,7 +36,7 @@ class Downloader:
     def start(self):
         log.info("Starting PlayListDownloader")
 
-        self.future = _downloadersThreadPool.submit(self.run)
+        self.future = _downloaders_thread_pool.submit(self.run)
 
     def stop(self):
         log.info("Stopping PlayListDownloader")
@@ -47,7 +46,7 @@ class Downloader:
         else:
             return False
 
-    def getName(self):
+    def get_name(self):
         pass
 
     def get_init_date(self, format=None):
@@ -81,7 +80,7 @@ class Downloader:
 
             raise Exception("Error in Downloader")
 
-    def getStatus(self):
+    def get_status(self):
         if not self.future:
             return DownloadStatus.STOPPED
         elif self.future.running():
@@ -102,7 +101,7 @@ class SpotifyDownloader(Downloader):
 
         self.url = url
 
-    def getName(self):
+    def get_name(self):
         if hasattr(self, 'name'):
             return self.name
         else:

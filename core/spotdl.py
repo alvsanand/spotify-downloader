@@ -1,6 +1,5 @@
 from core import const
 from core.const import log
-from core import config
 from core import metadata
 from core import convert
 from core import internals
@@ -10,10 +9,7 @@ from slugify import slugify
 import spotipy
 import urllib.request
 import os
-import sys
 import time
-import platform
-import pprint
 from cachetools import TTLCache
 
 
@@ -38,7 +34,8 @@ def _check_exists(folder, music_file, raw_song, meta_tags):
         if song.endswith('.temp'):
             os.remove(os.path.join(folder, song))
             continue
-        # check if a song with the same name is already present in the given folder
+        # check if a song with the same name is
+        # already present in the given folder
         if os.path.splitext(song)[0] == music_file:
             log.debug('Found an already existing song: "{}"'.format(song))
             if internals.is_spotify(raw_song):
@@ -46,8 +43,8 @@ def _check_exists(folder, music_file, raw_song, meta_tags):
                 # if not, remove it and download again without prompt
                 already_tagged = metadata.compare(os.path.join(folder, song),
                                                   meta_tags)
-                log.debug('Checking if it is already tagged correctly? {}'.format(
-                          already_tagged))
+                log.debug('Checking if it is already tagged correctly? {}'
+                          .format(already_tagged))
                 if not already_tagged:
                     os.remove(os.path.join(folder, song))
                     return False
@@ -81,7 +78,8 @@ def _download_songs(folder, songs):
             songs.append(raw_song)
 
             log.warning(
-                'Failed to download song. Will retry after other songs\n', exc_info=True)
+                'Failed to download song. Will retry after other songs\n',
+                exc_info=True)
 
             # wait 0.5 sec to avoid infinite looping
             time.sleep(0.5)
@@ -143,7 +141,8 @@ def _download_single(folder, raw_song, number=None):
             print('')
             try:
                 convert.song(input_song, output_song, folder,
-                             avconv=const.config.avconv, trim_silence=const.config.trim_silence)
+                             avconv=const.config.avconv,
+                             trim_silence=const.config.trim_silence)
             except FileNotFoundError:
                 encoder = 'avconv' if const.config.avconv else 'ffmpeg'
                 log.warning(
@@ -185,7 +184,8 @@ def _map_track(_track, default_album):
         'artists': ", ".join(
             map(lambda a: a['name'], track['artists'])
         ),
-        'album':  track['album']['name'] if 'album' in track else default_album,
+        'album': track['album']['name'] if 'album' in track
+        else default_album,
         'url': track['external_urls']['spotify'],
     }
 

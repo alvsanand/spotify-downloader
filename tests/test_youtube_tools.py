@@ -1,13 +1,4 @@
-from core import const
-from core import config
-from core import internals
-from core import spotdl
-from core import spotify_tools
-from core import youtube_tools
-
-
-import os
-import builtins
+from core import config, const, internals, spotdl, spotify_tools, youtube_tools
 
 config.init_config()
 raw_song = "Tony's Videos VERY SHORT VIDEO 28.10.2016"

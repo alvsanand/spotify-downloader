@@ -1,12 +1,10 @@
-import yaml
 
-from core import config as cfg
-from core import const
 import copy
+import os
 
 import pytest
-import os
-import sys
+
+from core import config as cfg
 
 
 class TestConfig:
@@ -39,7 +37,8 @@ class TestConfig:
         assert merged_config == modified_config
 
     def test__save_config(self, init_config):
-        modified_config = copy.deepcopy(cfg._default_conf)['spotify_downloader']
+        modified_config = copy.deepcopy(cfg._default_conf)[
+            'spotify_downloader']
 
         modified_config['file_format'] = 'just_a_test'
 

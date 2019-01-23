@@ -1,10 +1,11 @@
-from mutagen.easyid3 import EasyID3
-from mutagen.id3 import ID3, TORY, TYER, TPUB, APIC, USLT, COMM
-from mutagen.mp4 import MP4, MP4Cover
-from mutagen.flac import Picture, FLAC
-from core.const import log, TAG_PRESET, M4A_TAG_PRESET
-
 import urllib.request
+
+from mutagen.easyid3 import EasyID3
+from mutagen.flac import FLAC, Picture
+from mutagen.id3 import APIC, COMM, ID3, TORY, TPUB, TYER, USLT
+from mutagen.mp4 import MP4, MP4Cover
+
+from core.const import M4A_TAG_PRESET, TAG_PRESET, log
 
 
 def compare(music_file, metadata):
@@ -75,11 +76,14 @@ class EmbedMetadata:
         audiofile['TORY'] = TORY(encoding=3, text=meta_tags['year'])
         audiofile['TYER'] = TYER(encoding=3, text=meta_tags['year'])
         audiofile['TPUB'] = TPUB(encoding=3, text=meta_tags['publisher'])
-        audiofile['COMM'] = COMM(encoding=3, text=meta_tags['external_urls']['spotify'])
+        audiofile['COMM'] = COMM(encoding=3,
+                                 text=meta_tags['external_urls']['spotify'])
         if meta_tags['lyrics']:
-            audiofile['USLT'] = USLT(encoding=3, desc=u'Lyrics', text=meta_tags['lyrics'])
+            audiofile['USLT'] = USLT(
+                encoding=3, desc=u'Lyrics', text=meta_tags['lyrics'])
         try:
-            albumart = urllib.request.urlopen(meta_tags['album']['images'][0]['url'])
+            albumart = urllib.request.urlopen(
+                meta_tags['album']['images'][0]['url'])
             audiofile['APIC'] = APIC(encoding=3, mime='image/jpeg', type=3,
                                      desc=u'Cover', data=albumart.read())
             albumart.close()
@@ -99,7 +103,8 @@ class EmbedMetadata:
         if meta_tags['lyrics']:
             audiofile['lyrics'] = meta_tags['lyrics']
         try:
-            albumart = urllib.request.urlopen(meta_tags['album']['images'][0]['url'])
+            albumart = urllib.request.urlopen(
+                meta_tags['album']['images'][0]['url'])
             audiofile[M4A_TAG_PRESET['albumart']] = [MP4Cover(
                 albumart.read(), imageformat=MP4Cover.FORMAT_JPEG)]
             albumart.close()
@@ -123,7 +128,8 @@ class EmbedMetadata:
         image.type = 3
         image.desc = 'Cover'
         image.mime = 'image/jpeg'
-        albumart = urllib.request.urlopen(meta_tags['album']['images'][0]['url'])
+        albumart = urllib.request.urlopen(
+            meta_tags['album']['images'][0]['url'])
         image.data = albumart.read()
         albumart.close()
         audiofile.add_picture(image)
@@ -151,8 +157,8 @@ class EmbedMetadata:
             audiofile[preset['tracknumber']] = str(meta_tags['track_number'])
         else:
             if preset['tracknumber'] == TAG_PRESET['tracknumber']:
-                audiofile[preset['tracknumber']] = '{}/{}'.format(meta_tags['track_number'],
-                                                                  meta_tags['total_tracks'])
+                audiofile[preset['tracknumber']] = '{}/{}'.format(
+                    meta_tags['track_number'], meta_tags['total_tracks'])
             else:
                 audiofile[preset['tracknumber']] = [
                     (meta_tags['track_number'], meta_tags['total_tracks'])

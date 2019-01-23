@@ -1,51 +1,50 @@
-import api
-import core
-from core import const
-from collections import MutableMapping, namedtuple
 import copy
-
-import logging
-import yaml
-import argparse
-
 import os
 import sys
+import yaml
+import api
+import core
+
+from collections import MutableMapping
+from core import const
 
 log = const.log
 _LOG_LEVELS_STR = ['INFO', 'WARNING', 'ERROR', 'DEBUG']
 
 _default_conf = {
-                'spotify_downloader': {
-                        'avconv'                 : False,
-                        'download_only_metadata' : False,
-                        'file_format'            : '{number}_{artist}_{track_name}',
-                        'folder'                 : "/music",
-                        'input_ext'              : '.m4a',
-                        'log_level'              : 'INFO',
-                        'match_by_string'        : True,
-                        'max_downloads'          : 2,
-                        'music_videos_only'      : False,
-                        'no_metadata'            : False,
-                        'no_spaces'              : False,
-                        'output_ext'             : '.mp3',
-                        'overwrite'              : 'force',
-                        'cache_ttl'              : 600,
-                        'search_format'          : '{artist} - {track_name} song',
-                        'search_max_results'     : 20,
-                        # Generate the token. Please respect these credentials :)
-                        'spotify_auth'           : {
-                            'client_id'             : '4fe3fecfe5334023a1472516cc99d805',
-                            'client_secret'         : '0f02b7c483c04257984695007a4a8d5c'
-                        },
-                        'trim_silence'           : False,
-                        # Generate the token. Please respect these credentials :)
-                        'youtube_api_key'        : 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0',
-                }
-            }
+    'spotify_downloader': {
+        'avconv': False,
+        'download_only_metadata': False,
+        'file_format': '{number}_{artist}_{track_name}',
+        'folder': "/music",
+        'input_ext': '.m4a',
+        'log_level': 'INFO',
+        'match_by_string': True,
+        'max_downloads': 2,
+        'music_videos_only': False,
+        'no_metadata': False,
+        'no_spaces': False,
+        'output_ext': '.mp3',
+        'overwrite': 'force',
+        'cache_ttl': 600,
+        'search_format': '{artist} - {track_name} song',
+        'search_max_results': 20,
+        # Generate the token. Please respect these credentials :)
+        'spotify_auth': {
+            'client_id': '4fe3fecfe5334023a1472516cc99d805',
+            'client_secret': '0f02b7c483c04257984695007a4a8d5c'
+        },
+        'trim_silence': False,
+        # Generate the token. Please respect these credentials :)
+        'youtube_api_key': 'AIzaSyC6cEeKlxtOPybk9sEe5ksFN5sB-7wzYp0',
+    }
+}
 
 
 def _get_config_file_name():
-    return os.getenv('CONFIG_FILE_PATH', os.path.join(sys.path[0], 'config.yml'))
+    return os.getenv('CONFIG_FILE_PATH', os.path.join(
+        sys.path[0],
+        'config.yml'))
 
 
 def _merge(default, config):
@@ -93,6 +92,7 @@ class _DotDictify(dict):
         return found
 
     __setattr__, __getattr__ = __setitem__, __getitem__
+
 
 def _unpack(dictionary):
     return _DotDictify(dictionary)
