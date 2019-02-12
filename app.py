@@ -1,9 +1,7 @@
-from core import const
 from core.const import log
-from core import youtube_tools
 from core import config
 
-from flask import Flask, render_template, redirect
+from flask import Flask
 import os
 
 

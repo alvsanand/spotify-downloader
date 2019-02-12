@@ -63,10 +63,6 @@ const settings_types = {
         type: "String",
         advanced: true
     },
-    'match_by_string': {
-        type: "Boolean",
-        advanced: true
-    },
     'max_downloads': {
         type: "Integer",
         advanced: false

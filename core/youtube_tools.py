@@ -121,46 +121,46 @@ class GenerateYouTubeURL:
             log.debug(
                 'Since no metadata found on Spotify, first result')
         else:
-            if const.config.match_by_string:
-                sanitize_search = internals.sanitize(self.search_query).lower()
+            # filter out videos that do not have a similar
+            # length to the Spotify song
+            duration_tolerance = 10
+            max_duration_tolerance = 20
+            possible_videos_by_duration = []
+            const.config.search_format.split(" ")
 
-                videos_with_ratio = list(map(lambda x: (
-                    fuzz.ratio(sanitize_search,
-                               internals.sanitize(x['title']).lower()), x
-                ), videos))
+            # start with a reasonable duration_tolerance, and increment
+            # duration_tolerance until one of the Youtube results falls
+            # within the correct duration or the duration_tolerance has
+            # reached the max_duration_tolerance
+            while len(possible_videos_by_duration) == 0:
+                possible_videos_by_duration = list(filter(lambda x: abs(
+                    x['seconds'] - self.meta_tags['duration']) <=
+                    duration_tolerance, videos))
+                duration_tolerance += 1
+                if duration_tolerance > max_duration_tolerance:
+                    log.error("{0} by {1} was not found.\n".format(
+                                self.meta_tags['name'],
+                                self.meta_tags['artists'][0]['name']))
+                    return None
 
-                sorted_videos_with_ratio = sorted(videos_with_ratio,
-                                                  key=lambda x: x[0],
-                                                  reverse=True)
+            sanitize_search = internals.sanitize(self.search_query).lower()
 
-                result = sorted_videos_with_ratio[0][1]
+            videos_with_ratio = list(map(lambda x: (
+                fuzz.ratio(sanitize_search,
+                           internals.sanitize(x['title']).lower()), x
+            ), possible_videos_by_duration))
 
-                log.info('_best_match: {0} => {1}'.format(
-                    self.search_query, result['title']))
-            else:
-                # filter out videos that do not have a similar
-                # length to the Spotify song
-                duration_tolerance = 10
-                max_duration_tolerance = 20
-                possible_videos_by_duration = []
-                const.config.search_format.split(" ")
+            possible_videos_by_string = list(map(lambda x: x[1],
+                                             sorted(videos_with_ratio,
+                                                    key=lambda x: x[0],
+                                                    reverse=True)))
 
-                # start with a reasonable duration_tolerance, and increment
-                # duration_tolerance until one of the Youtube results falls
-                # within the correct duration or the duration_tolerance has
-                # reached the max_duration_tolerance
-                while len(possible_videos_by_duration) == 0:
-                    possible_videos_by_duration = list(filter(lambda x: abs(
-                        x['seconds'] - self.meta_tags['duration']) <=
-                        duration_tolerance, videos))
-                    duration_tolerance += 1
-                    if duration_tolerance > max_duration_tolerance:
-                        log.error("{0} by {1} was not found.\n".format(
-                                 self.meta_tags['name'],
-                                 self.meta_tags['artists'][0]['name']))
-                        return None
+            result = possible_videos_by_string[0]
 
-                result = possible_videos_by_duration[0]
+            log.debug('_best_matches for query[{0}]: {1}'.format(
+                self.search_query,
+                ";".join(map(lambda x: x['title'], possible_videos_by_string))
+            ))
 
         if result:
             url = "https://youtube.com/watch?v={0}".format(result['link'])

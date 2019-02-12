@@ -154,7 +154,7 @@ class Info extends React.Component {
                             {element.name}
                         </TableCell>
                         <TableCell>
-                            {element.album}
+                            {element.artists}
                         </TableCell>
                         <TableCell>
                             {element.album}
