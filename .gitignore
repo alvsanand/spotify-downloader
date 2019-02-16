@@ -113,6 +113,7 @@ venv.bak/
 
 # vscode
 .vscode
+.history
 
 # react-ui
 node_modules

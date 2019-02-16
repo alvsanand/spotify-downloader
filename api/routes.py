@@ -102,7 +102,7 @@ def download_history():
         items = list(map(lambda d: {
             'url': d[0],
             'name': d[1].get_name(),
-            'status': d[1].get_status().value,
+            'status': (d[1].get_status()[0].value, d[1].get_status()[1]),
             'init_date': d[1].get_init_date(format="%H:%M:%S"),
             'end_date': d[1].get_end_date(format="%H:%M:%S"),
         },

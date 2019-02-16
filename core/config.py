@@ -19,6 +19,7 @@ _default_conf = {
         'folder': "/music",
         'input_ext': '.m4a',
         'log_level': 'INFO',
+        'match_by_string_factor': 0.2,
         'max_downloads': 2,
         'music_videos_only': False,
         'no_metadata': False,

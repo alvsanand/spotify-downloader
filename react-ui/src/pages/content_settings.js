@@ -63,6 +63,10 @@ const settings_types = {
         type: "String",
         advanced: true
     },
+    'match_by_string_factor': {
+        type: "Float",
+        advanced: true
+    },
     'max_downloads': {
         type: "Integer",
         advanced: false
@@ -194,6 +198,26 @@ class SettingsItem extends React.Component {
                     name={name}
                     error={error}
                     type="number"
+                    variant="outlined"
+                    label={label}
+                    style={{ margin: 8 }}
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    value={value}
+                    onChange={onChange}
+                />
+        }
+        else if (type === "Float") {
+            field =
+                <TextField
+                    required
+                    name={name}
+                    error={error}
+                    type="number"
+                    step="0.01"
                     variant="outlined"
                     label={label}
                     style={{ margin: 8 }}

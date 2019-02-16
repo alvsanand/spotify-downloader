@@ -24,14 +24,15 @@ That's how it will look like!
 
 - Run docker container:
 
-    ```
+    ``` bash
     MUSIC_FOLDER={YOUR_MUSIC_DIRECTORY}
     docker run --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
     ```
+
 - For accessing the UI, go to [http://localhost:5000](http://localhost:5000).
 - In order to see the logs:
 
-    ```
+    ``` bash
     docker logs $(docker ps -aq --filter name=spotify-downloader)
     ```
 
@@ -41,20 +42,22 @@ Un order to run in development mode:
 
 - Start Flask server:
 
-    ```
-    python3 -m venv env
-    source env/bin/activate
+    ``` bash
+    sudo apt-get install build-essential python3-venv python3-dev
+
+    python3 -m venv venv
+    source venv/bin/activate
     pip install --upgrade pip
     pip install -r requirements.txt
-    source env/bin/activate
 
     export LOCAL_MODE=True
 
     python app.py
     ```
+
 - Start react server:
 
-    ```
+    ``` bash
     cd react-ui
     npm install
     npm run start
@@ -62,7 +65,10 @@ Un order to run in development mode:
 
 ## Running Tests
 
-```
+``` bash
+python3 -m venv venv
+source venv/bin/activate
+
 pip install pytest
 
 python3 -m pytest tests

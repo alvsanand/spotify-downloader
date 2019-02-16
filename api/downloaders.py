@@ -41,7 +41,10 @@ class Downloader:
     def stop(self):
         log.info("Stopping PlayListDownloader")
 
+        self.status_message = "Canceled Downloader"
+
         if self.future:
+
             return self.future.cancel()
         else:
             return False
@@ -64,6 +67,7 @@ class Downloader:
 
     def run(self):
         log.info("Init Downloader")
+        self.status_message = "Init Downloader"
 
         try:
             self.init_date = time.localtime()
@@ -73,8 +77,12 @@ class Downloader:
             self.end_date = time.localtime()
 
             log.info("Finished Downloader")
-        except Exception:
+
+            self.status_message = "Finished Downloader"
+        except Exception as e:
             log.error("Error in Downloader", exc_info=True)
+
+            self.status_message = "Error in Downloader: {0}".format(str(e))
 
             self.end_date = time.localtime()
 
@@ -82,17 +90,17 @@ class Downloader:
 
     def get_status(self):
         if not self.future:
-            return DownloadStatus.STOPPED
+            return (DownloadStatus.STOPPED, self.status_message)
         elif self.future.running():
-            return DownloadStatus.RUNNING
+            return (DownloadStatus.RUNNING, self._get_status_message())
         elif self.future.cancelled():
-            return DownloadStatus.CANCELLED
+            return (DownloadStatus.CANCELLED, self.status_message)
         elif self.future.done() and self.future.exception():
-            return DownloadStatus.ERROR
+            return (DownloadStatus.ERROR, self.status_message)
         elif self.future.done():
-            return DownloadStatus.FINISHED
+            return (DownloadStatus.FINISHED, self.status_message)
         else:
-            return DownloadStatus.STOPPED
+            return (DownloadStatus.STOPPED, self.status_message)
 
 
 class SpotifyDownloader(Downloader):
@@ -100,6 +108,7 @@ class SpotifyDownloader(Downloader):
         super().__init__()
 
         self.url = url
+        self.status_message = ""
 
     def get_name(self):
         if hasattr(self, 'name'):
@@ -107,9 +116,16 @@ class SpotifyDownloader(Downloader):
         else:
             return ''
 
+    def _get_status_message(self):
+        return self.status_message
+
+    def _set_status_message(self, msg):
+        self.status_message = msg
+
     def download(self):
         playlist_name, songs = spotdl.fetch(self.url)
 
         self.name = playlist_name
 
-        spotdl.download(playlist_name, songs)
+        spotdl.download(playlist_name, songs,
+                        lambda s: self._set_status_message(s))

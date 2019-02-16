@@ -60,12 +60,17 @@ def _check_exists(folder, music_file, raw_song, meta_tags):
     return False
 
 
-def _download_songs(folder, songs):
+def _download_songs(folder, songs, status_func):
     log.info(u'Preparing to download {} songs'.format(len(songs)))
     downloaded_songs = []
 
     for number, raw_song in enumerate(songs):
         try:
+            status_func((
+                number, len(songs),
+                "Downloaded {0} of {1}".format(number, len(songs))
+            ))
+
             _download_single(folder, raw_song, number=number)
         # token expires after 1 hour
         except spotipy.client.SpotifyException:
@@ -237,11 +242,11 @@ def fetch_info(url):
     return results
 
 
-def download(name, songs):
+def download(name, songs, status_func):
     folder = os.path.join(const.config.folder, slugify(
                           name, ok=' -_()[]{}'))
 
-    _download_songs(folder, songs)
+    _download_songs(folder, songs, status_func)
 
 
 _DEFAULT_SEARCH_TYPES = [

@@ -48,7 +48,7 @@ def format_string(
     format_tags[9] = tags.get('track_number', '')
     format_tags[10] = tags.get('total_tracks', '')
     format_tags[11] = tags.get('external_ids', {'isrc': ''})['isrc']
-    format_tags[12] = tags.get('number', '')
+    format_tags[12] = int(tags.get('number', '0')) + 1
 
     for tag in format_tags:
         if slugification:

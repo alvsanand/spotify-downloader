@@ -11,7 +11,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import ErrorIcon from '@material-ui/icons/Error';
 import DoneIcon from '@material-ui/icons/Done';
-import CachedIcon from '@material-ui/icons/Cached';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import CancelIcon from '@material-ui/icons/Cancel';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import QueryBuilderIcon from '@material-ui/icons/QueryBuilder';
@@ -130,16 +130,24 @@ class ContentDownload extends React.Component {
 
         let rows = items.map((element, i) => {
             let icon = element.status
-            if (element.status === "FINISHED") {
-                icon = <DoneIcon />
-            } else if (element.status === "ERROR") {
-                icon = <ErrorIcon />
-            } else if (element.status === "RUNNING") {
-                icon = <CachedIcon />
-            } else if (element.status === "CANCELLED") {
-                icon = <CancelIcon />
-            } else if (element.status === "STOPPED") {
-                icon = <QueryBuilderIcon />
+            let status = element.status[0]
+            let statusMessage = element.status[1]
+            if (status === "FINISHED") {
+                icon = <DoneIcon titleAccess={statusMessage}/>
+            } else if (status === "ERROR") {
+                icon = <ErrorIcon titleAccess={statusMessage}/>
+            } else if (status === "RUNNING") {
+                icon = <div title={statusMessage[2]}>
+                            <CircularProgress
+                                variant="static"
+                                value={100 * (statusMessage[0] / statusMessage[1])}
+                                color="primary"
+                            />
+                        </div>
+            } else if (status === "CANCELLED") {
+                icon = <CancelIcon titleAccess={statusMessage}/>
+            } else if (status === "STOPPED") {
+                icon = <QueryBuilderIcon titleAccess={statusMessage}/>
             }
 
             return (

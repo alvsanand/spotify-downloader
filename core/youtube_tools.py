@@ -3,11 +3,12 @@ import urllib
 import pafy
 
 from core import internals
+from core.internals import sanitize as san
 from core import const
 
 import os
 
-from fuzzywuzzy import fuzz
+from fuzzywuzzy.fuzz import ratio
 
 log = const.log
 
@@ -143,25 +144,23 @@ class GenerateYouTubeURL:
                                 self.meta_tags['artists'][0]['name']))
                     return None
 
-            sanitize_search = internals.sanitize(self.search_query).lower()
+            san_srch = san(self.search_query).lower()
 
+            str_factor = float(const.config.match_by_string_factor)
+
+            possible_videos_by_duration.reverse()
             videos_with_ratio = list(map(lambda x: (
-                fuzz.ratio(sanitize_search,
-                           internals.sanitize(x['title']).lower()), x
-            ), possible_videos_by_duration))
+                (
+                    x[0] * (1 - str_factor) +
+                    ratio(san_srch, san(x[1]['title']).lower()) * str_factor
+                ), x[1]
+            ), enumerate(possible_videos_by_duration)))
 
-            possible_videos_by_string = list(map(lambda x: x[1],
-                                             sorted(videos_with_ratio,
+            possible_videos_by_string = list(sorted(videos_with_ratio,
                                                     key=lambda x: x[0],
-                                                    reverse=True)))
+                                                    reverse=True))
 
-            result = possible_videos_by_string[0]
-
-            log.debug('_best_matches for query[{0}]: {1}'.format(
-                self.search_query,
-                ";".join(map(lambda x: x['title'], possible_videos_by_string))
-            ))
-
+            result = possible_videos_by_string[0][1]
         if result:
             url = "https://youtube.com/watch?v={0}".format(result['link'])
         else:
