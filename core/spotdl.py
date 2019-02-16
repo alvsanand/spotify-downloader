@@ -68,7 +68,7 @@ def _download_songs(folder, songs, status_func):
         try:
             status_func((
                 number, len(songs),
-                "Downloaded {0} of {1}".format(number, len(songs))
+                "{0} / {1}".format(number, len(songs))
             ))
 
             _download_single(folder, raw_song, number=number)
