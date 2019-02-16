@@ -26,7 +26,7 @@ That's how it will look like!
 
     ``` bash
     MUSIC_FOLDER={YOUR_MUSIC_DIRECTORY}
-    docker run --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
+    docker run --restart=always --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
     ```
 
 - For accessing the UI, go to [http://localhost:5000](http://localhost:5000).
