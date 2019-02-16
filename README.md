@@ -69,7 +69,7 @@ Un order to run in development mode:
 python3 -m venv venv
 source venv/bin/activate
 
-pip install pytest
+pip install pytest pytest-cov
 
 python3 -m pytest tests
 ```

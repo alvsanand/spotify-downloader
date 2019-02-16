@@ -59,7 +59,7 @@ class TestFormatString:
         'track_number': 'my_track_number',
         'total_tracks': 'my_total_tracks',
         'external_ids': {'isrc': 'my_isrc'},
-        'number': 'my_number',
+        'number': '0',
     }
     some_tags = {
         'name': 'my_name',
@@ -114,7 +114,7 @@ class TestFormatString:
                    '_my_track_number' + \
                    '_my_total_tracks' + \
                    '_my_isrc' + \
-                   '_my_number'
+                   '_1'
 
         result = internals.format_string(string_format, TestFormatString.tags)
         assert result == expected
@@ -145,7 +145,7 @@ class TestFormatString:
                    '_my_track_number' + \
                    '_my_total_tracks' + \
                    '_my_isrc' + \
-                   '_my_number'
+                   '_1'
 
         result = internals.format_string(
             string_format*2, TestFormatString.tags)
