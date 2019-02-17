@@ -130,17 +130,18 @@ class ContentDownload extends React.Component {
 
         let rows = items.map((element, i) => {
             let icon = element.status
-            let status = element.status[0]
-            let statusMessage = element.status[1]
+            let status = element.status.code
+            let statusMessage = element.status.description
+            let progress = element.status.progress
             if (status === "FINISHED") {
                 icon = <DoneIcon titleAccess={statusMessage}/>
             } else if (status === "ERROR") {
                 icon = <ErrorIcon titleAccess={statusMessage}/>
             } else if (status === "RUNNING") {
-                icon = <div title={statusMessage[2]}>
+                icon = <div title={statusMessage}>
                             <CircularProgress
                                 variant="static"
-                                value={100 * (statusMessage[0] / statusMessage[1])}
+                                value={100 * (progress.current / progress.total)}
                                 color="primary"
                             />
                         </div>

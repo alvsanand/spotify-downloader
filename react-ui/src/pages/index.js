@@ -173,7 +173,7 @@ class SpotifyDownloader extends React.Component {
         .then(
             (result) => {
                 let runningDownloads = result.items.map((element, i) => {
-                    if (element.status[0] === "STOPPED" || element.status[0] === "RUNNING") {
+                    if (element.status.code === "STOPPED" || element.status.code === "RUNNING") {
                         return 1;
                     } else {
                         return 0;

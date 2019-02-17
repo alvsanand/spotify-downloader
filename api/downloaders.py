@@ -7,7 +7,14 @@ from core import const, spotdl
 from core.const import log
 
 
-class DownloadStatus(Enum):
+class DownloadStatus():
+    def __init__(self, code, description, progress=""):
+        self.code = code.value
+        self.description = description
+        self.progress = progress
+
+
+class DownloadStatusEnum(Enum):
     STOPPED = "STOPPED"
     CANCELLED = "CANCELLED"
     RUNNING = "RUNNING"
@@ -41,7 +48,7 @@ class Downloader:
     def stop(self):
         log.info("Stopping PlayListDownloader")
 
-        self.status_message = "Canceled Downloader"
+        self.status = "Canceled Downloader"
 
         if self.future:
 
@@ -67,7 +74,7 @@ class Downloader:
 
     def run(self):
         log.info("Init Downloader")
-        self.status_message = "Init Downloader"
+        self.status = "Init Downloader"
 
         try:
             self.init_date = time.localtime()
@@ -78,11 +85,11 @@ class Downloader:
 
             log.info("Finished Downloader")
 
-            self.status_message = "Finished Downloader"
+            self.status = "Finished Downloader"
         except Exception as e:
             log.error("Error in Downloader", exc_info=True)
 
-            self.status_message = "Error in Downloader: {0}".format(str(e))
+            self.status = "Error in Downloader: {0}".format(str(e))
 
             self.end_date = time.localtime()
 
@@ -90,17 +97,20 @@ class Downloader:
 
     def get_status(self):
         if not self.future:
-            return (DownloadStatus.STOPPED, self.status_message)
+            return DownloadStatus(DownloadStatusEnum.STOPPED, self.status)
         elif self.future.running():
-            return (DownloadStatus.RUNNING, self._get_status_message())
+            progress = self._get_progress()
+            status = "{0} / {1}".format(progress["current"], progress["total"])
+
+            return DownloadStatus(DownloadStatusEnum.RUNNING, status, progress)
         elif self.future.cancelled():
-            return (DownloadStatus.CANCELLED, self.status_message)
+            return DownloadStatus(DownloadStatusEnum.CANCELLED, self.status)
         elif self.future.done() and self.future.exception():
-            return (DownloadStatus.ERROR, self.status_message)
+            return DownloadStatus(DownloadStatusEnum.ERROR, self.status)
         elif self.future.done():
-            return (DownloadStatus.FINISHED, self.status_message)
+            return DownloadStatus(DownloadStatusEnum.FINISHED, self.status)
         else:
-            return (DownloadStatus.STOPPED, self.status_message)
+            return DownloadStatus(DownloadStatusEnum.STOPPED, self.status)
 
 
 class SpotifyDownloader(Downloader):
@@ -108,7 +118,7 @@ class SpotifyDownloader(Downloader):
         super().__init__()
 
         self.url = url
-        self.status_message = ""
+        self.status = ""
 
     def get_name(self):
         if hasattr(self, 'name'):
@@ -116,11 +126,11 @@ class SpotifyDownloader(Downloader):
         else:
             return ''
 
-    def _get_status_message(self):
-        return self.status_message
+    def _get_progress(self):
+        return self.status
 
-    def _set_status_message(self, msg):
-        self.status_message = msg
+    def _set_progress(self, msg):
+        self.status = msg
 
     def download(self):
         playlist_name, songs = spotdl.fetch(self.url)
@@ -128,4 +138,4 @@ class SpotifyDownloader(Downloader):
         self.name = playlist_name
 
         spotdl.download(playlist_name, songs,
-                        lambda s: self._set_status_message(s))
+                        lambda s: self._set_progress(s))

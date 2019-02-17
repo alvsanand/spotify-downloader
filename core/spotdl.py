@@ -60,16 +60,16 @@ def _check_exists(folder, music_file, raw_song, meta_tags):
     return False
 
 
-def _download_songs(folder, songs, status_func):
+def _download_songs(folder, songs, progress_func):
     log.info(u'Preparing to download {} songs'.format(len(songs)))
     downloaded_songs = []
 
     for number, raw_song in enumerate(songs):
         try:
-            status_func((
-                number, len(songs),
-                "{0} / {1}".format(number, len(songs))
-            ))
+            progress_func({
+                "current": number,
+                "total": len(songs)
+            })
 
             _download_single(folder, raw_song, number=number)
         # token expires after 1 hour
@@ -242,11 +242,11 @@ def fetch_info(url):
     return results
 
 
-def download(name, songs, status_func):
+def download(name, songs, progress_func):
     folder = os.path.join(const.config.folder, slugify(
                           name, ok=' -_()[]{}'))
 
-    _download_songs(folder, songs, status_func)
+    _download_songs(folder, songs, progress_func)
 
 
 _DEFAULT_SEARCH_TYPES = [
