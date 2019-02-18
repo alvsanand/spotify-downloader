@@ -17,7 +17,7 @@ let txt = new LocalizedStrings({
         by: "By",
     },
     es: {
-        album: "Álbumn",
+        album: "Álbum",
         by: "Por",
     }
 });
@@ -50,7 +50,7 @@ const styles = theme => ({
     },
     image: {
         margin: 10,
-        height: "auto", 
+        height: "auto",
         width: "auto",
         maxWidth: tile_width - 10,
         maxHeight: tile_height - 10,
@@ -61,8 +61,8 @@ let last_number = -1;
 
 function get_random_image() {
     let number = 0
-    
-    while ((number=Math.floor(Math.random() * 5))===last_number){}
+
+    while ((number = Math.floor(Math.random() * 5)) === last_number) { }
 
     last_number = number;
 
@@ -82,18 +82,18 @@ class SearchListItem extends React.Component {
     render() {
         const { classes, info } = this.props;
         const { name, url, image, album, artists, num_tracks } = this.props;
-        
+
         let final_image = "";
         if (image !== "") {
             final_image = image
         }
-        else{
+        else {
             final_image = get_random_image();
         }
 
         return (
             <GridListTile className={classes.tile}>
-                <img src={final_image} alt={name} className={classes.image}/>
+                <img src={final_image} alt={name} className={classes.image} />
                 <GridListTileBar
                     title={name}
                     classes={{
@@ -103,32 +103,32 @@ class SearchListItem extends React.Component {
                     subtitle={
                         <div>
                             {album !== "" &&
-                            <span>{txt.album}: {album}</span>
+                                <span>{txt.album}: {album}</span>
                             }
                             {album !== "" &&
-                            <br />
+                                <br />
                             }
                             {artists !== "" &&
-                            <span>{txt.by}: {artists}</span>
+                                <span>{txt.by}: {artists}</span>
                             }
-                            {artists > 0 &&
-                            <br />
+                            {artists !== "" &&
+                                <br />
                             }
-                            {num_tracks > 0 &&
-                            <span>#{num_tracks}</span>
+                            {num_tracks > 1 &&
+                                <span>#{num_tracks}</span>
                             }
                         </div>
                     }
                     actionIcon={
                         <IconButton className={classes.icon} onClick={() => info(url)}>
-                            <InfoIcon color="secondary"/>
+                            <InfoIcon color="secondary" />
                         </IconButton>
                     }
                 />
             </GridListTile>
         )
     }
-} 
+}
 
 class SearchList extends React.Component {
     state = {
@@ -147,24 +147,24 @@ class SearchList extends React.Component {
             return "";
         }
 
-        let content = items.map((element, i) => 
-            <SearchListItem 
+        let content = items.map((element, i) =>
+            <SearchListItem
                 key={element.url}
                 name={element.name}
                 url={element.url}
                 image={element.image}
                 album={element.album}
                 artists={element.artists}
-                num_tracks={element.num_tracks} 
+                num_tracks={element.num_tracks}
                 info={info}
-                classes={classes}/>
+                classes={classes} />
         );
 
-        if(items.length === 1){
+        if (items.length === 1) {
             //Fix bug in Material-UI
-        return <ul style={{ listStyleType: "none" }}>{content}</ul>;
+            return <ul style={{ listStyleType: "none" }}>{content}</ul>;
         }
-        else{
+        else {
             return (
                 <GridList cellHeight={tile_height} className={classes.gridList} cols={2.5}>
                     {content}

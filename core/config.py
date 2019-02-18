@@ -28,7 +28,7 @@ _default_conf = {
         'overwrite': 'force',
         'cache_ttl': 600,
         'search_format': '{artist} - {track_name} lyrics',
-        'search_max_results': 20,
+        'search_max_results': 50,
         # Generate the token. Please respect these credentials :)
         'spotify_auth': {
             'client_id': '4fe3fecfe5334023a1472516cc99d805',

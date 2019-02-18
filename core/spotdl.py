@@ -210,6 +210,9 @@ def fetch_info(url):
     image = ""
     if 'images' in data and len(data['images']) > 0:
         image = data['images'][0]['url']
+    elif 'images' in data['album'] \
+         and len(data['album']['images']) > 0:
+        image = data['album']['images'][0]['url']
 
     description = ""
     if 'description' in data and len(data['description']) > 0:
@@ -272,10 +275,18 @@ def _map_search_item(item):
     image = ""
     if 'images' in item and len(item['images']) > 0:
         image = item['images'][0]['url']
+    elif 'images' in item['album'] \
+         and len(item['album']['images']) > 0:
+        image = item['album']['images'][0]['url']
+
+    album = ""
+    if 'album' in item and len(item['album']) > 0:
+        album = item['album']['name']
 
     return {
         'name': item['name'],
         'url': item['external_urls']['spotify'],
+        'album': album,
         'artists': artists,
         'image': image,
         'num_tracks': num_tracks,

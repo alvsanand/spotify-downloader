@@ -45,7 +45,7 @@ let txt = new LocalizedStrings({
         title: "Buscar",
         description: "Resultados para",
         error_search: "Error al buscar.",
-        album_title: "Álbumnes",
+        album_title: "Álbumes",
         playlist_title: "Listas de reproducciones",
         track_title: "Canciones",
         table_column_name: "Nombre",

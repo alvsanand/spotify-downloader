@@ -31,7 +31,7 @@ let txt = new LocalizedStrings({
     },
     es: {
         error_info: "Error al obtener información sobre la URL.",
-        album: "Álbumn",
+        album: "Álbum",
         by: "Por",
         table_column_name: "NOMBRE",
         table_column_artits: "ARTISTA",
@@ -61,10 +61,10 @@ const styles = theme => ({
         height: 180,
     },
     controls: {
-      display: 'flex',
-      alignItems: 'center',
-      paddingLeft: theme.spacing.unit,
-      paddingBottom: theme.spacing.unit,
+        display: 'flex',
+        alignItems: 'center',
+        paddingLeft: theme.spacing.unit,
+        paddingBottom: theme.spacing.unit,
     },
 });
 
@@ -118,10 +118,10 @@ class Info extends React.Component {
             event.preventDefault();
 
             let link = ""
-            if(_link.indexOf("?") >= 0){
+            if (_link.indexOf("?") >= 0) {
                 link = _link + "&play"
             }
-            else{
+            else {
                 link = _link + "?play"
             }
 
@@ -133,7 +133,7 @@ class Info extends React.Component {
         const { classes } = this.props;
         const { result } = this.state;
 
-        if(result==null){
+        if (result == null) {
             return ""
         }
 
@@ -143,12 +143,12 @@ class Info extends React.Component {
         }
 
         let tracks = "";
-        if(result.tracks!=null && result.type !== 'TRACK'){
+        if (result.tracks != null && result.type !== 'TRACK') {
             tracks = result.tracks.map((element, i) => {
                 return (
                     <TableRow key={i}>
                         <TableCell>
-                            {i+1}
+                            {i + 1}
                         </TableCell>
                         <TableCell>
                             {element.name}
@@ -205,10 +205,10 @@ class Info extends React.Component {
                         title={result.name}
                     />
                 </Card>
-                {tracks !=="" &&
-                <br />
+                {tracks !== "" &&
+                    <br />
                 }
-                {tracks !=="" &&
+                {tracks !== "" &&
                     <Table className={classes.table}>
                         <TableHead>
                             <TableRow>

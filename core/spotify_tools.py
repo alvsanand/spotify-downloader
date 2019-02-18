@@ -147,6 +147,7 @@ def _fetch_track(track):
         'name': track['name'],
         'artists': track['artists'],
         'album': track['album']['name'],
+        'images': track['album']['images'],
         'tracks': {
             'items': [
                 track
