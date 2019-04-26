@@ -72,6 +72,7 @@ def _download_songs(folder, songs, progress_func):
             })
 
             _download_single(folder, raw_song, number=number)
+            downloaded_songs.append(raw_song)
         # token expires after 1 hour
         except spotipy.client.SpotifyException:
             # refresh token when it expires
@@ -89,8 +90,8 @@ def _download_songs(folder, songs, progress_func):
             # wait 0.5 sec to avoid infinite looping
             time.sleep(0.5)
             continue
-
-        downloaded_songs.append(raw_song)
+        except Exception:
+            log.exception('Error downloading song {}'.format(raw_song))
 
     return downloaded_songs
 
@@ -143,7 +144,6 @@ def _download_single(folder, raw_song, number=None):
         input_song = songname + const.config.input_ext
         output_song = songname + const.config.output_ext
         if youtube_tools.download_song(songpath, input_song, content):
-            print('')
             try:
                 convert.song(input_song, output_song, folder,
                              avconv=const.config.avconv,
@@ -160,6 +160,8 @@ def _download_single(folder, raw_song, number=None):
             if not const.config.no_metadata and meta_tags is not None:
                 metadata.embed(os.path.join(folder, output_song), meta_tags)
             return True
+        else:
+            log.exception('Error downloading song {}'.format(raw_song))
 
 
 def _map_track_url(_track):
@@ -247,7 +249,7 @@ def fetch_info(url):
 
 def download(name, songs, progress_func):
     folder = os.path.join(const.config.folder, slugify(
-                          name, ok=' -_()[]{}'))
+                          name, ok='-_'))
 
     _download_songs(folder, songs, progress_func)
 

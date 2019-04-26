@@ -67,6 +67,10 @@ const settings_types = {
         type: "Float",
         advanced: true
     },
+    'match_by_view_factor': {
+        type: "Float",
+        advanced: true
+    },
     'max_downloads': {
         type: "Integer",
         advanced: false

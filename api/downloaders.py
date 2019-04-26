@@ -100,7 +100,9 @@ class Downloader:
             return DownloadStatus(DownloadStatusEnum.STOPPED, self.status)
         elif self.future.running():
             progress = self._get_progress()
-            status = "{0} / {1}".format(progress["current"], progress["total"])
+            status = "{0} / {1}".format(
+                progress["current"] if "current" in progress else "0",
+                progress["total"] if "total" in progress else "0")
 
             return DownloadStatus(DownloadStatusEnum.RUNNING, status, progress)
         elif self.future.cancelled():

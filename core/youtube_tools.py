@@ -147,20 +147,22 @@ class GenerateYouTubeURL:
             san_srch = san(self.search_query).lower()
 
             str_factor = float(const.config.match_by_string_factor)
+            view_factor = float(const.config.match_by_view_factor)
 
             possible_videos_by_duration.reverse()
             videos_with_ratio = list(map(lambda x: (
                 (
-                    x[0] * (1 - str_factor) +
+                    x[0] * (1 - str_factor - view_factor) +
+                    int(x[1]['views']) * view_factor +
                     ratio(san_srch, san(x[1]['title']).lower()) * str_factor
                 ), x[1]
             ), enumerate(possible_videos_by_duration)))
 
-            possible_videos_by_string = list(sorted(videos_with_ratio,
+            possible_videos_by_rating = list(sorted(videos_with_ratio,
                                                     key=lambda x: x[0],
                                                     reverse=True))
 
-            result = possible_videos_by_string[0][1]
+            result = possible_videos_by_rating[0][1]
         if result:
             url = "https://youtube.com/watch?v={0}".format(result['link'])
         else:
@@ -245,7 +247,8 @@ class GenerateYouTubeURL:
                 'link': x['id'],
                 'title': x['snippet']['title'],
                 'videotime': internals.videotime_from_seconds(duration_s),
-                'seconds': duration_s}
+                'seconds': duration_s,
+                'views': x['statistics']['viewCount']}
             videos.append(youtubedetails)
 
         if bestmatch:

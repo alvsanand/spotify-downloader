@@ -52,7 +52,7 @@ def format_string(
 
     for tag in format_tags:
         if slugification:
-            format_tags[tag] = sanitize(format_tags[tag],
+            format_tags[tag] = sanitize(str(format_tags[tag]),
                                         ok='-_()[]{}')
         else:
             format_tags[tag] = str(format_tags[tag])
@@ -68,7 +68,7 @@ def format_string(
     return string_format
 
 
-def sanitize(title, ok='-_()[]{}\\/'):
+def sanitize(title, ok='-_'):
     """ Generate filename of the song to be downloaded. """
 
     if const.config.no_spaces:
