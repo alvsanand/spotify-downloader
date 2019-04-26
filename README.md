@@ -24,9 +24,20 @@ That's how it will look like!
 
 - Run docker container:
 
+  - Unix:
+
     ``` bash
     MUSIC_FOLDER={YOUR_MUSIC_DIRECTORY}
     docker run --restart=always --name spotify-downloader -p 5000:5000 -u `stat -c "%u:%g" $MUSIC_FOLDER` -d -v $MUSIC_FOLDER:/music alvsanand/spotify-downloader
+    ```
+
+  - Windows:
+
+    ``` bash
+    % First, you must have configured shared folders in Docker Desktop
+
+    set MUSIC_FOLDER={YOUR_MUSIC_DIRECTORY}
+    docker run --restart=always --name spotify-downloader -p 5000:5000 -d -v %MUSIC_FOLDER%:/music alvsanand/spotify-downloader
     ```
 
 - For accessing the UI, go to [http://localhost:5000](http://localhost:5000).
