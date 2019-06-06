@@ -1,5 +1,5 @@
 pathlib >= 1.0.1
-youtube_dl >= 2019.04.24
+youtube_dl >= 2019.5.20
 pafy >= 0.5.3.1
 spotipy >= 2.4.4
 mutagen >= 1.37
