@@ -47,6 +47,14 @@ That's how it will look like!
     docker logs $(docker ps -aq --filter name=spotify-downloader)
     ```
 
+- Sometimes "youtube_dl" python library is outdated and downloads do not work. So just, we must remove the current execution and launch it again.
+
+    ``` bash
+    docker rm -f $(docker ps -aq --filter name=spotify-downloader)
+
+    ## See "Run docker container"
+    ```
+
 ## Development
 
 Un order to run in development mode:
