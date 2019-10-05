@@ -74,6 +74,26 @@ def info():
         abort(500, 'Error getting playlist info')
 
 
+@app.route('/youtube', methods=['GET'])
+def youtube():
+    if 'url' not in request.args:
+        abort(400,
+              'Error getting playlist redirecting to youtube: url obligatory')
+
+    try:
+        url = request.args['url']
+
+        log.info("Redirecting to youtube[%s]", url)
+
+        yt_url = spotdl.fetch_yt_url(url)
+
+        return redirect(yt_url, code=302)
+    except Exception:
+        log.error("Error redirecting to youtube", exc_info=True)
+
+        abort(500, 'Error redirecting to youtube')
+
+
 @app.route('/search', methods=['POST'])
 def search():
     if not request.json or 'query' not in request.json:

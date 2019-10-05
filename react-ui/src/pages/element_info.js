@@ -12,6 +12,7 @@ import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import IconButton from '@material-ui/core/IconButton';
 import PlayArrow from '@material-ui/icons/PlayArrow';
+import MusicVideo from '@material-ui/icons/MusicVideo';
 
 import Config from '../config';
 
@@ -27,7 +28,8 @@ let txt = new LocalizedStrings({
         table_column_name: "NAME",
         table_column_artits: "ARTIST",
         table_column_album: "ALBUM",
-        button_play: "Play",
+        button_play_spotify: "Play in Spotify",
+        button_play_youtube: "Play in Youtube",
     },
     es: {
         error_info: "Error al obtener información sobre la URL.",
@@ -36,7 +38,8 @@ let txt = new LocalizedStrings({
         table_column_name: "NOMBRE",
         table_column_artits: "ARTISTA",
         table_column_album: "ÁLBUMN",
-        button_play: "Escuchar",
+        button_play_spotify: "Escuchar en Spotify",
+        button_play_youtube: "Escuchar en Youtube",
     }
 });
 
@@ -113,7 +116,7 @@ class Info extends React.Component {
     componentWillUnmount() {
     };
 
-    play(_link) {
+    play_spotify(_link) {
         return (event) => {
             event.preventDefault();
 
@@ -124,6 +127,16 @@ class Info extends React.Component {
             else {
                 link = _link + "?play"
             }
+
+            window.open(link);
+        }
+    };
+
+    play_youtube(_link) {
+        return (event) => {
+            event.preventDefault();
+
+            let link = Config.API_SERVER_URL + "/youtube?url=" + _link
 
             window.open(link);
         }
@@ -160,8 +173,11 @@ class Info extends React.Component {
                             {element.album}
                         </TableCell>
                         <TableCell align="right">
-                            <IconButton variant="extended" aria-label={txt.button_play} onClick={this.play(element.url)}>
+                            <IconButton variant="extended" aria-label={txt.button_play_spotify} onClick={this.play_spotify(element.url)}>
                                 <PlayArrow />
+                            </IconButton>
+                            <IconButton variant="extended" aria-label={txt.button_play_youtube} onClick={this.play_youtube(element.url)}>
+                                <MusicVideo />
                             </IconButton>
                         </TableCell>
                     </TableRow>
@@ -193,8 +209,11 @@ class Info extends React.Component {
                                 </Typography>
                             }
                             <div className={classes.controls}>
-                                <IconButton variant="extended" aria-label={txt.button_play} onClick={this.play(result.url)}>
+                                <IconButton variant="extended" aria-label={txt.button_play_spotify} onClick={this.play_spotify(result.url)}>
                                     <PlayArrow />
+                                </IconButton>
+                                <IconButton variant="extended" aria-label={txt.button_play_youtube} onClick={this.play_youtube(result.url)}>
+                                    <MusicVideo />
                                 </IconButton>
                             </div>
                         </CardContent>

@@ -197,6 +197,16 @@ def _map_track(_track, default_album):
     }
 
 
+def fetch_yt_url(url):
+    meta_tags = spotify_tools.generate_metadata(url)
+    content = youtube_tools.go_pafy(url, meta_tags)
+
+    if content:
+        return content.watchv_url
+
+    return
+
+
 def fetch_info(url):
     cache_key = _cache_formatter.format("info", url)
 
