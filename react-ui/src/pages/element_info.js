@@ -212,9 +212,11 @@ class Info extends React.Component {
                                 <IconButton variant="extended" aria-label={txt.button_play_spotify} onClick={this.play_spotify(result.url)}>
                                     <PlayArrow />
                                 </IconButton>
+                                {result.type === 'TRACK' &&
                                 <IconButton variant="extended" aria-label={txt.button_play_youtube} onClick={this.play_youtube(result.url)}>
                                     <MusicVideo />
                                 </IconButton>
+                                }
                             </div>
                         </CardContent>
                     </div>
