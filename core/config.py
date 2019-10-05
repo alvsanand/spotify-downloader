@@ -28,7 +28,7 @@ _default_conf = {
         'output_ext': '.mp3',
         'overwrite': 'force',
         'cache_ttl': 600,
-        'search_format': '{artist} - {track_name} lyrics',
+        'search_format': '{artist} - {track_name} lyrics -live -"no voice"',
         'search_max_results': 50,
         # Generate the token. Please respect these credentials :)
         'spotify_auth': {
