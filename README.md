@@ -10,6 +10,7 @@ This is a list of some of its features:
 - Downloads songs from YouTube in an MP3 format by using Spotify metadata.
 - Functional UI based on ReactJS and MATERIAL-UI.
 - Search for songs, albums and playlist or simply copy the Spotify's HTTP link.
+- Pre-visualize the songs before downloading them in YouTube.
 - Fetch info from Spotify and play the songs using its web player.
 - Automatically applies metadata to the downloaded song
 - Works straight out of the box and does not require to generate or mess with your API keys (already included).
