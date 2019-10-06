@@ -115,6 +115,8 @@ class GenerateYouTubeURL:
                                     meta_tags, force_spaces=True)
 
     def _best_match(self, videos):
+        result = None
+
         if not self.meta_tags:
             # if the metadata could not be acquired, take the first result
             # from Youtube because the proper song length is unknown
@@ -142,27 +144,10 @@ class GenerateYouTubeURL:
                     log.error("{0} by {1} was not found.\n".format(
                                 self.meta_tags['name'],
                                 self.meta_tags['artists'][0]['name']))
-                    return None
-
-            san_srch = san(self.search_query).lower()
-
-            str_factor = float(const.config.match_by_string_factor)
-            view_factor = float(const.config.match_by_view_factor)
-
-            possible_videos_by_duration.reverse()
-            videos_with_ratio = list(map(lambda x: (
-                (
-                    x[0] * (1 - str_factor - view_factor) +
-                    int(x[1]['views']) * view_factor +
-                    ratio(san_srch, san(x[1]['title']).lower()) * str_factor
-                ), x[1]
-            ), enumerate(possible_videos_by_duration)))
-
-            possible_videos_by_rating = list(sorted(videos_with_ratio,
-                                                    key=lambda x: x[0],
-                                                    reverse=True))
-
-            result = possible_videos_by_rating[0][1]
+                    result = videos[0]
+                    break
+            if not result:
+                result = possible_videos_by_duration[0]
         if result:
             url = "https://youtube.com/watch?v={0}".format(result['link'])
         else:
@@ -248,7 +233,8 @@ class GenerateYouTubeURL:
                 'title': x['snippet']['title'],
                 'videotime': internals.videotime_from_seconds(duration_s),
                 'seconds': duration_s,
-                'views': x['statistics']['viewCount']}
+                'views': x['statistics'].get('viewCount', 0)
+            }
             videos.append(youtubedetails)
 
         if bestmatch:

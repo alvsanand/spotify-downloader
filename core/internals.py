@@ -2,6 +2,7 @@ import os
 import re
 
 from slugify import slugify
+from jinja2 import Template
 
 from core import const
 
@@ -31,6 +32,11 @@ def is_youtube(url):
     return _YOUTUBE_RE.match(url)
 
 
+from jinja2 import environment
+environment.DEFAULT_FILTERS['regex_replace'] = \
+    lambda s, f, r: re.sub(f, r, s)
+
+
 def format_string(
         string_format, tags, slugification=False, force_spaces=False):
     # Generate a string of the format '[artist] - [song]'
@@ -57,15 +63,19 @@ def format_string(
         else:
             format_tags[tag] = str(format_tags[tag])
 
+    ninja_format = string_format.replace('{', '{{').replace('}', '}}')
+    string_format_template = Template(ninja_format)
+
+    data = {}
     for x in formats:
-        format_tag = '{' + formats[x] + '}'
-        string_format = string_format.replace(format_tag,
-                                              format_tags[x])
+        data[formats[x]] = format_tags[x]
+
+    rendered_string = string_format_template.render(data)
 
     if const.config.no_spaces and not force_spaces:
-        string_format = string_format.replace(' ', '_')
+        rendered_string = rendered_string.replace(' ', '_')
 
-    return string_format
+    return rendered_string
 
 
 def sanitize(title, ok='-_'):

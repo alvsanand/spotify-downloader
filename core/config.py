@@ -19,8 +19,6 @@ _default_conf = {
         'folder': "/music",
         'input_ext': '.m4a',
         'log_level': 'INFO',
-        'match_by_string_factor': 0.1,
-        'match_by_view_factor': 0.4,
         'max_downloads': 2,
         'music_videos_only': False,
         'no_metadata': False,
@@ -28,7 +26,7 @@ _default_conf = {
         'output_ext': '.mp3',
         'overwrite': 'force',
         'cache_ttl': 600,
-        'search_format': '{artist} - {track_name} lyrics -live -"no voice"',
+        'search_format': '+"{artist}" {track_name | regex_replace("\\(.+\\)", "") | regex_replace(" - .+", "") | trim} music',
         'search_max_results': 50,
         # Generate the token. Please respect these credentials :)
         'spotify_auth': {
